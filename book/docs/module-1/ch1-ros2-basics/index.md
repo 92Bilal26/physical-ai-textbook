@@ -190,7 +190,7 @@ Before starting, make sure you have:
 - [ ] Linux terminal comfort level (mkdir, cd, ls)
 - [ ] Ability to run `ros2 --version` and see version info
 
-Not set up yet? See [Quickstart Guide](../../../quickstart.md).
+Not set up yet? See [ROS 2 Humble Installation Guide](https://docs.ros.org/en/humble/Installation.html).
 
 ---
 
