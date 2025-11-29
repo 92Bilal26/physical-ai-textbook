@@ -1,21 +1,28 @@
 <!--
 Sync Impact Report:
-Version: 1.0.0 (Initial Constitution)
+Version: 1.1.0 (Minor Update - Added Constitution Gates)
 Ratification Date: 2025-11-29
-Modified Principles: N/A (Initial creation)
-Added Sections: All core sections for Physical AI & Humanoid Robotics textbook
+Last Amended: 2025-11-29
+Modified Principles:
+  - Principle 1: Enhanced with version-specific requirements
+  - Added Section X: Constitution Gates for Template Alignment
+Added Sections:
+  - Section X: Constitution Gates (aligns with plan-template.md requirements)
+  - Enhanced governance with explicit template synchronization requirements
 Removed Sections: None
 Templates Status:
-  ✅ constitution.md - Created
-  ⚠ plan-template.md - Exists, may need alignment validation
-  ⚠ spec-template.md - Exists, may need alignment validation
-  ⚠ tasks-template.md - Exists, may need alignment validation
-Follow-up TODOs: None - all placeholders filled
+  ✅ constitution.md - Updated to v1.1.0
+  ✅ plan-template.md - Aligned (Constitution Check section references this file)
+  ✅ spec-template.md - Aligned (User story format matches requirements)
+  ✅ tasks-template.md - Aligned (Task organization by user story)
+Follow-up TODOs:
+  - Validate constitution gates during first chapter specification
+  - Ensure all ROS 2 code examples specify Humble/Iron versions
 -->
 
 # Physical AI & Humanoid Robotics Textbook — Constitution
 
-**Version:** 1.0.0
+**Version:** 1.1.0
 **Ratified:** 2025-11-29
 **Last Amended:** 2025-11-29
 **Scope:** Educational textbook creation for Physical AI & Humanoid Robotics course
@@ -41,10 +48,10 @@ This project creates a **market-defining textbook** for Physical AI & Humanoid R
 ### Before Creating Any Content, Analyze:
 
 **1. Technical Accuracy Requirements**
-- All ROS 2 code examples must be tested and executable
-- NVIDIA Isaac, Gazebo, Unity integrations must reflect current versions
-- Hardware specifications must match actual requirements
-- Simulation examples must be reproducible
+- All ROS 2 code examples MUST be tested and executable
+- NVIDIA Isaac, Gazebo, Unity integrations MUST reflect current versions
+- Hardware specifications MUST match actual requirements
+- Simulation examples MUST be reproducible
 
 **2. Learning Progression**
 - Students progress from theoretical foundations to hands-on simulation
@@ -117,20 +124,20 @@ Just as software developers use testing frameworks before production deployment,
 
 ### Principle 1: Hands-On Technical Accuracy
 
-**Every code example, simulation script, and configuration must be executable and tested.**
+**Every code example, simulation script, and configuration MUST be executable and tested.**
 
 **Requirements:**
-- All ROS 2 code must run on ROS 2 Humble/Iron
-- Gazebo simulations must execute with provided URDF/SDF files
-- NVIDIA Isaac examples must specify Isaac Sim version
-- Unity integrations must document Unity version and packages
-- Hardware specifications must reflect actual market availability and pricing
+- All ROS 2 code MUST run on ROS 2 Humble (Ubuntu 22.04) or Iron (Ubuntu 22.04)
+- Gazebo simulations MUST execute with provided URDF/SDF files (Gazebo Classic 11 or Gazebo Sim)
+- NVIDIA Isaac examples MUST specify Isaac Sim version (2023.1.0+)
+- Unity integrations MUST document Unity version (2022.3 LTS+) and required packages
+- Hardware specifications MUST reflect actual market availability and current pricing (verified within 30 days)
 
 **Verification Protocol:**
-- Code blocks include version information and dependencies
-- Simulation files are provided in accompanying repository
-- Screenshots/videos demonstrate actual execution
-- Error cases and troubleshooting guidance included
+- Code blocks MUST include version information and dependency specifications
+- Simulation files MUST be provided in accompanying GitHub repository
+- Screenshots/videos MUST demonstrate actual execution on specified versions
+- Error cases and troubleshooting guidance MUST be included for common failures
 
 **Rationale:** Students learning robotics face enough genuine complexity. Outdated or incorrect examples waste precious time and damage trust in the educational material.
 
@@ -173,7 +180,7 @@ Just as software developers use testing frameworks before production deployment,
 
 ### Principle 3: Simulation-First Methodology
 
-**All robotic development begins in simulation before hardware deployment.**
+**All robotic development MUST begin in simulation before hardware deployment.**
 
 **Simulation Workflow:**
 1. **Design Phase:** Define robot specifications (URDF/SDF)
@@ -197,9 +204,9 @@ Just as software developers use testing frameworks before production deployment,
 **The textbook itself models AI-native development practices through spec-driven methodology.**
 
 **Specification-First Approach:**
-- Each chapter begins with learning objectives (specification)
-- Code examples reference specifications explicitly
-- Projects require spec.md before implementation
+- Each chapter MUST begin with learning objectives (specification)
+- Code examples MUST reference specifications explicitly
+- Projects MUST require spec.md before implementation
 - AI chatbot assists with specification refinement
 
 **SpecKit Plus Integration:**
@@ -220,7 +227,7 @@ Just as software developers use testing frameworks before production deployment,
 
 ### Principle 5: Hardware Reality and Accessibility
 
-**All hardware recommendations must reflect actual market availability, realistic pricing, and accessibility constraints.**
+**All hardware recommendations MUST reflect actual market availability, realistic pricing, and accessibility constraints.**
 
 **Hardware Specification Requirements:**
 1. **Workstation Requirements (Clearly Stated):**
@@ -247,10 +254,10 @@ Just as software developers use testing frameworks before production deployment,
    - Still requires local Jetson kit for edge deployment
 
 **Accessibility Considerations:**
-- Textbook must work with simulation-only setup (no physical robot required for core learning)
-- Cloud-based alternatives documented for students without high-end workstations
+- Textbook MUST work with simulation-only setup (no physical robot required for core learning)
+- Cloud-based alternatives MUST be documented for students without high-end workstations
 - Open-source tools prioritized (ROS 2, Gazebo) over proprietary where possible
-- Hardware substitution guidance (alternatives to RealSense, Jetson)
+- Hardware substitution guidance MUST be provided (alternatives to RealSense, Jetson)
 
 **Rationale:** Students need realistic expectations about hardware requirements. Transparency about costs enables informed decisions and prevents frustration from underpowered setups.
 
@@ -361,7 +368,7 @@ Just as software developers use testing frameworks before production deployment,
 
 ### Principle 8: Multilingual Accessibility (English/Urdu)
 
-**Content must be accessible in both English and Urdu to serve diverse learner populations.**
+**Content MUST be accessible in both English and Urdu to serve diverse learner populations.**
 
 **Translation Features:**
 
@@ -412,23 +419,25 @@ Just as software developers use testing frameworks before production deployment,
 
 **General Education Subagents:**
 1. **exercise-designer:** Creates hands-on exercises from learning objectives
-2. **assessment-creator:** Generates quizzes and coding challenges
-3. **diagram-generator:** Produces technical diagrams and flowcharts
-4. **code-explainer:** Annotates code with pedagogical comments
+2. **code-explainer:** Annotates code with pedagogical comments
 
 **Agent Skills:**
 
 **Technical Skills:**
-- `ros2-package-setup`: Automates ROS 2 package creation workflow
-- `gazebo-world-builder`: Guides simulation environment design
-- `isaac-sim-integration`: Templates for Isaac Sim integration
-- `nav2-configuration`: Configures Nav2 navigation stack
+- `code-example-generator`: Generate spec-driven code examples
+- `code-validation-sandbox`: Validate ROS 2 code execution
+- `docusaurus-deployer`: Deploy Docusaurus site to GitHub Pages
 
 **Pedagogical Skills:**
-- `learning-objective-mapper`: Maps content to Bloom's taxonomy
-- `prerequisite-checker`: Validates chapter dependency chains
-- `exercise-difficulty-calibrator`: Ensures progressive challenge
-- `code-example-tester`: Automates code validation
+- `learning-objectives`: Map content to Bloom's taxonomy
+- `skills-proficiency-mapper`: Map skills to CEFR proficiency levels
+- `assessment-builder`: Create assessments aligned to learning objectives
+- `quiz-generator`: Generate quizzes with validated answer distributions
+- `exercise-designer`: Create progressive exercises with difficulty calibration
+- `summary-generator`: Generate lesson summaries
+- `content-evaluation-framework`: Evaluate chapter quality systematically
+- `book-scaffolding`: Organize book structure and chapter dependencies
+- `concept-scaffolding`: Break down complex concepts with cognitive load management
 
 **Organizational Value:**
 - Skills reusable across other Panaversity textbooks
@@ -444,7 +453,7 @@ Just as software developers use testing frameworks before production deployment,
 
 ### Code Quality Standards
 
-**All code must meet production-quality standards:**
+**All code MUST meet production-quality standards:**
 
 **Testing Requirements:**
 - Unit tests for ROS 2 nodes (pytest for Python, gtest for C++)
@@ -621,15 +630,19 @@ chat_history (
 - Define learning objectives, prerequisites, key concepts
 - Identify hardware/software requirements
 - Specify exercises and assessments
+- Organize user stories with priorities (P1, P2, P3)
+- Ensure each user story is independently testable
 
 **2. Planning Phase:**
 - Create `specs/[module-name]/[chapter-name]/plan.md`
 - Break down into sections and subsections
 - Define code examples needed
 - Plan interactive elements (exercises, chatbot prompts)
+- Pass Constitution Check gates before proceeding
 
 **3. Implementation Phase:**
 - Create `specs/[module-name]/[chapter-name]/tasks.md`
+- Organize tasks by user story for independent implementation
 - Write chapter markdown in `book/docs/`
 - Develop code examples in `code-examples/`
 - Test all code and simulations
@@ -797,16 +810,88 @@ chat_history (
 
 ### Amendment Process
 
-**For Clarifications:**
-- Edit directly, increment PATCH version (1.0.0 → 1.0.1)
+**For Clarifications (PATCH version):**
+- Edit directly, increment PATCH version (1.1.0 → 1.1.1)
 - Document in Sync Impact Report
 - Commit with descriptive message
+- No template updates required
 
-**For Substantive Changes:**
+**For Substantive Changes (MINOR/MAJOR version):**
 - Create ADR documenting rationale
-- Increment MINOR/MAJOR version (1.0.0 → 1.1.0 or 2.0.0)
+- Increment MINOR (1.1.0 → 1.2.0) for new principles/sections
+- Increment MAJOR (1.1.0 → 2.0.0) for breaking changes
 - Update impacted templates
 - Migration guidance if needed
+- Update Sync Impact Report with template synchronization status
+
+### Template Synchronization Requirements
+
+**After amending this constitution, agents MUST:**
+1. Review plan-template.md Constitution Check section
+2. Review spec-template.md user story format requirements
+3. Review tasks-template.md task organization requirements
+4. Update templates if constitution changes affect their structure
+5. Document template updates in Sync Impact Report
+
+---
+
+## X. Constitution Gates
+
+**These gates MUST be checked during the planning phase (plan-template.md "Constitution Check" section).**
+
+### Gate 1: Technical Accuracy
+- [ ] All ROS 2 code specifies version (Humble or Iron)
+- [ ] All simulation examples specify tool versions (Gazebo 11 / Gazebo Sim / Isaac Sim 2023.1.0+)
+- [ ] Hardware specifications verified within 30 days
+- [ ] All code examples executable in documented environment
+
+### Gate 2: Learning Progression
+- [ ] Chapter prerequisites validated against prior modules
+- [ ] Complexity appropriate for module tier (Weeks 1-2 / 3-7 / 8-10 / 11-13)
+- [ ] Learning objectives mapped to Bloom's taxonomy
+- [ ] Exercises integrate theory and practice
+
+### Gate 3: Simulation-First
+- [ ] All robotic concepts introduced in simulation before hardware
+- [ ] Simulation workflow documented (Design → Sim → Train → Validate → Deploy)
+- [ ] Edge cases and failure modes tested in simulation
+- [ ] Performance metrics defined
+
+### Gate 4: AI-Native Workflow
+- [ ] Chapter has spec.md with learning objectives
+- [ ] Code examples reference specifications
+- [ ] AI chatbot integration points identified
+- [ ] User stories prioritized and independently testable
+
+### Gate 5: Hardware Reality
+- [ ] Hardware recommendations based on actual market availability
+- [ ] Pricing verified within 30 days
+- [ ] Simulation-only alternative documented
+- [ ] Cloud alternative costs calculated
+
+### Gate 6: RAG Integration
+- [ ] Chapter content structured for RAG indexing (512 token chunks)
+- [ ] Selection-based query points identified
+- [ ] Chatbot test questions defined
+- [ ] Expected answers documented for validation
+
+### Gate 7: Personalization
+- [ ] Content adaptable for beginner/intermediate/advanced levels
+- [ ] Code examples available in multiple languages where appropriate
+- [ ] Hardware-specific guidance identified
+- [ ] Personalization button placement defined
+
+### Gate 8: Multilingual Access
+- [ ] Technical terms identified for glossary
+- [ ] Translation-appropriate sections marked
+- [ ] Code blocks excluded from translation
+- [ ] Urdu terminology validated
+
+### Gate 9: Reusable Intelligence
+- [ ] Subagents/skills utilized where applicable
+- [ ] New skills documented if created
+- [ ] Skills contribution to organizational knowledge tracked
+- [ ] Reusability across future courses considered
 
 ---
 
@@ -824,4 +909,4 @@ This constitution establishes the governance framework for creating a comprehens
 
 ---
 
-**Version:** 1.0.0 | **Ratified:** 2025-11-29 | **Last Amended:** 2025-11-29
+**Version:** 1.1.0 | **Ratified:** 2025-11-29 | **Last Amended:** 2025-11-29
