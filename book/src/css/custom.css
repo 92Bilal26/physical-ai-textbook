@@ -3,34 +3,45 @@
  * Customized theme for robotics education with dark/light mode support
  */
 
+@import './homepage.css';
+
 /* Physical AI Robotics Theme Colors */
 :root {
-  --ifm-color-primary: #1f6feb;      /* Deep blue */
-  --ifm-color-primary-dark: #1a5bdb;
-  --ifm-color-primary-darker: #154ec6;
-  --ifm-color-primary-darkest: #0e3ba0;
-  --ifm-color-primary-light: #388bfd;
-  --ifm-color-primary-lighter: #54a3ff;
-  --ifm-color-primary-lightest: #79b8ff;
+  --ifm-color-primary: #06b6d4;      /* Cyan accent */
+  --ifm-color-primary-dark: #0891b2;
+  --ifm-color-primary-darker: #0e7490;
+  --ifm-color-primary-darkest: #155e75;
+  --ifm-color-primary-light: #06f;
+  --ifm-color-primary-lighter: #22d3ee;
+  --ifm-color-primary-lightest: #cffafe;
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
 
+  /* Dark theme by default */
+  --ifm-background-color: #0f172a;
+  --ifm-background-surface-primary: #1a2a4f;
+  --ifm-background-surface-secondary: #1e3a5f;
+
   /* Robotics-specific color variables */
-  --robotics-primary: #1f6feb;       /* GitHub blue */
-  --robotics-secondary: #238636;     /* ROS 2 green */
-  --robotics-accent: #f86422;        /* Energy orange */
+  --robotics-primary: #06b6d4;       /* Cyan */
+  --robotics-secondary: #3b82f6;     /* Blue */
+  --robotics-accent: #8b5cf6;        /* Purple */
   --robotics-light-bg: #f5f5f5;
   --robotics-code-bg: #0d1117;
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
+/* Dark mode (default) */
 [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
+  --ifm-color-primary: #06b6d4;
+  --ifm-color-primary-dark: #0891b2;
+  --ifm-color-primary-darker: #0e7490;
+  --ifm-color-primary-darkest: #155e75;
+  --ifm-color-primary-light: #06f;
+  --ifm-color-primary-lighter: #22d3ee;
+  --ifm-color-primary-lightest: #cffafe;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+
+  --ifm-background-color: #0f172a;
+  --ifm-background-surface-primary: #1a2a4f;
+  --ifm-background-surface-secondary: #1e3a5f;
 }

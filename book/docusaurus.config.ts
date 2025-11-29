@@ -41,26 +41,10 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+            'https://github.com/92Bilal26/physical-ai-textbook/tree/main/',
         },
-        blog: {
-          showReadingTime: true,
-          feedOptions: {
-            type: ['rss', 'atom'],
-            xslt: true,
-          },
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
-          // Useful options to enforce blogging best practices
-          onInlineTags: 'warn',
-          onInlineAuthors: 'warn',
-          onUntruncatedBlogPosts: 'warn',
-        },
+        blog: false, // Disable blog feature
         theme: {
           customCss: './src/css/custom.css',
         },
@@ -69,23 +53,26 @@ const config: Config = {
   ],
 
   themeConfig: {
-    // Replace with your project's social card
     image: 'img/docusaurus-social-card.jpg',
     colorMode: {
-      respectPrefersColorScheme: true,
+      defaultMode: 'dark',
+      disableSwitch: false,
+      respectPrefersColorScheme: false,
     },
     navbar: {
-      title: 'Physical AI Textbook',
+      title: 'Physical AI',
       logo: {
-        alt: 'Physical AI Logo',
+        alt: 'Physical AI & Humanoid Robotics',
         src: 'img/logo.svg',
+        width: 32,
+        height: 32,
       },
       items: [
         {
           type: 'docSidebar',
           sidebarId: 'tutorialSidebar',
           position: 'left',
-          label: 'Module 1',
+          label: 'Learn',
         },
         {
           href: 'https://github.com/92Bilal26/physical-ai-textbook',
@@ -98,11 +85,19 @@ const config: Config = {
       style: 'dark',
       links: [
         {
-          title: 'Docs',
+          title: 'Learning',
           items: [
             {
-              label: 'Tutorial',
-              to: '/docs/intro',
+              label: 'Module 1: ROS 2 Fundamentals',
+              to: '/docs/module-1/',
+            },
+            {
+              label: 'Code Examples',
+              to: '/docs/module-1/ch1-ros2-basics/',
+            },
+            {
+              label: 'Exercises',
+              to: '/docs/module-1/ch1-ros2-basics/',
             },
           ],
         },
@@ -110,34 +105,38 @@ const config: Config = {
           title: 'Community',
           items: [
             {
-              label: 'Stack Overflow',
-              href: 'https://stackoverflow.com/questions/tagged/docusaurus',
+              label: 'GitHub',
+              href: 'https://github.com/92Bilal26/physical-ai-textbook',
             },
             {
-              label: 'Discord',
-              href: 'https://discordapp.com/invite/docusaurus',
+              label: 'ROS Discourse',
+              href: 'https://discourse.ros.org/',
             },
             {
-              label: 'X',
-              href: 'https://x.com/docusaurus',
+              label: 'Issues & Feedback',
+              href: 'https://github.com/92Bilal26/physical-ai-textbook/issues',
             },
           ],
         },
         {
-          title: 'More',
+          title: 'Resources',
           items: [
             {
-              label: 'Blog',
-              to: '/blog',
+              label: 'Contributing Guide',
+              to: '/CONTRIBUTING.md',
             },
             {
-              label: 'GitHub',
-              href: 'https://github.com/facebook/docusaurus',
+              label: 'ROS 2 Documentation',
+              href: 'https://docs.ros.org/en/humble/',
+            },
+            {
+              label: 'Gazebo Simulator',
+              href: 'https://gazebosim.org/',
             },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Physical AI Textbook Project. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Physical AI Textbook Project. MIT License. Built with Docusaurus.`,
     },
     prism: {
       theme: prismThemes.github,
