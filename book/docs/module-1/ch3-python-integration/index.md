@@ -1,65 +1,60 @@
 ---
-title: Chapter 3 - Python Integration
-sidebar_label: Ch3 - Python Integration
+title: Chapter 3 - Python Integration with rclpy
 ---
 
-# Chapter 3: Python Integration
+# Chapter 3: Python Integration with rclpy
 
-**Status**: Coming Soon 🚧
+**Controlling Robots with Python Code**
 
-**Learning Time**: 30-35 minutes
-**Level**: Intermediate
-**Prerequisites**: Complete Chapters 1-2
+*From Robot Description to Robot Control*
+
+---
+
+## Chapter Overview
+
+In **Chapter 2**, you learned to describe robot structure using URDF—defining links, joints, masses, and geometry.
+
+In **Chapter 3**, you'll take the next step: **controlling those robots using Python code**.
+
+This is where robotics comes alive. Instead of just describing what a robot looks like, you'll write Python programs that:
+- ✅ Send velocity commands to make robots move
+- ✅ Read and modify configuration parameters
+- ✅ Implement goal-reaching behaviors with progress feedback
+- ✅ Coordinate multiple robots and sensors
 
 ---
 
 ## What You'll Learn
 
-This chapter teaches you how to control robots using Python (rclpy) and advanced ROS 2 concepts.
+### Three Key Topics
 
-### Topics Covered
+**Section 1: rclpy Basics** (8 minutes)
+- Understand Python node structure
+- Create publishers for velocity commands
+- Implement control loops that send repeated commands
 
-- Node structure best practices
-- Parameters for runtime configuration
-- Actions for long-running tasks
-- Robot hardware integration
-- Advanced control patterns
+**Section 2: Working with Parameters** (7 minutes)
+- Declare parameters (configuration values)
+- Read parameters in code
+- React to parameter changes without restarting
 
-### Learning Objectives
-
-By the end of this chapter, you will be able to:
-- Control robots with rclpy
-- Configure nodes using parameters
-- Implement action servers and clients
-- Build complete control systems
-- Integrate with hardware drivers
-
----
-
-## Content Coming Soon
-
-This chapter is currently in development. Check back soon!
-
-**Estimated Release**: Phase 3, Week 3
+**Section 3: Actions for Goal-Reaching** (8 minutes)
+- Understand when to use actions (vs topics/services)
+- Implement action servers (execute goals)
+- Send goals from action clients
 
 ---
 
 ## Prerequisites
 
-- ✅ Completed [Chapter 1: ROS 2 Basics](../ch1-ros2-basics/index.md)
-- ✅ Completed [Chapter 2: URDF Robot Description](../ch2-urdf/index.md)
-- Python 3.10+ experience
-- Understanding of ROS 2 nodes and topics
+Before starting this chapter, ensure you've completed:
+- [ ] Chapter 1: ROS 2 Basics (nodes, topics, services)
+- [ ] Chapter 2: URDF Robot Description (links, joints, visualization)
+- [ ] Basic Python programming skills
 
 ---
 
-## Next Steps
-
-1. **Now**: Complete [Chapter 1: ROS 2 Basics](../ch1-ros2-basics/index.md)
-2. **Then**: Complete [Chapter 2: URDF Robot Description](../ch2-urdf/index.md)
-3. **Finally**: Return here for Chapter 3: Python Integration
-
----
-
-**Chapter Status**: In Development 🚧
+**Chapter Status**: Ready for Learning ✅
 **Last Updated**: 2025-11-30
+**Estimated Time**: 35-40 minutes reading + 25-35 minutes practice
+
