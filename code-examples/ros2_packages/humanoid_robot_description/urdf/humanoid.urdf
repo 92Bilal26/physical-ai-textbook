@@ -1,0 +1,549 @@
+<?xml version="1.0"?>
+<!--
+Simplified Humanoid Robot URDF Model
+=====================================
+
+This URDF describes a simplified humanoid robot with:
+- Torso (main body)
+- Left and right arms (3 DOF each: shoulder, elbow, wrist)
+- Left and right legs (2 DOF each: hip, knee)
+- Head (1 DOF: neck rotation)
+
+Total: ~12 degrees of freedom
+
+Kinematic Structure:
+                    head
+                     |
+    l_shoulder - torso - r_shoulder
+      |                    |
+   l_arm                 r_arm
+      |                    |
+   l_hand                r_hand
+      |
+    l_hip - - - r_hip
+      |           |
+   l_knee      r_knee
+      |           |
+   l_foot      r_foot
+
+This model is simplified for educational purposes. Real humanoids have:
+- More DOFs (hands, fingers, etc.)
+- Better balanced inertia
+- Collision geometries for interaction
+
+Usage:
+  visualize: ros2 run rviz2 rviz2 -d humanoid.rviz
+  validate:  check_urdf humanoid.urdf
+  simulate:  ros2 launch humanoid_robot_description display.launch.py
+-->
+
+<robot name="humanoid_robot">
+
+  <!-- Material definitions -->
+  <material name="dark_gray">
+    <color rgba="0.3 0.3 0.3 1.0"/>
+  </material>
+  <material name="light_gray">
+    <color rgba="0.7 0.7 0.7 1.0"/>
+  </material>
+  <material name="skin">
+    <color rgba="0.9 0.8 0.7 1.0"/>
+  </material>
+
+  <!-- ============= TORSO (Main Body) ============= -->
+  <link name="world"/>
+
+  <joint name="base_joint" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0.5" rpy="0 0 0"/>
+  </joint>
+
+  <link name="base_link">
+    <inertial>
+      <mass value="30.0"/>
+      <origin xyz="0 0 0.3" rpy="0 0 0"/>
+      <inertia
+        ixx="0.5" ixy="0.0" ixz="0.0"
+        iyy="0.5" iyz="0.0"
+        izz="0.3"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0.3" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.3 0.25 0.6"/>
+      </geometry>
+      <material name="dark_gray"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0.3" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.3 0.25 0.6"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- ============= HEAD ============= -->
+  <!-- Neck joint: rotation around Z axis -->
+  <joint name="neck_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="head"/>
+    <origin xyz="0 0 0.6" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-1.5708" upper="1.5708" effort="5" velocity="1.0"/>
+    <dynamics damping="0.1" friction="0.05"/>
+  </joint>
+
+  <link name="head">
+    <inertial>
+      <mass value="3.0"/>
+      <origin xyz="0 0 0.1" rpy="0 0 0"/>
+      <inertia
+        ixx="0.03" ixy="0.0" ixz="0.0"
+        iyy="0.03" iyz="0.0"
+        izz="0.02"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0.1" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="0.1"/>
+      </geometry>
+      <material name="skin"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0.1" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="0.1"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- ============= LEFT ARM ============= -->
+  <!-- Left shoulder: revolute joint (pitch and roll) -->
+  <joint name="l_shoulder_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="l_upper_arm"/>
+    <origin xyz="0.15 0.15 0.5" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-1.5708" upper="1.5708" effort="20" velocity="1.5"/>
+    <dynamics damping="0.1" friction="0.1"/>
+  </joint>
+
+  <link name="l_upper_arm">
+    <inertial>
+      <mass value="2.0"/>
+      <origin xyz="0 0 -0.2" rpy="0 0 0"/>
+      <inertia
+        ixx="0.02" ixy="0.0" ixz="0.0"
+        iyy="0.08" iyz="0.0"
+        izz="0.08"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 -0.2" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.08 0.08 0.4"/>
+      </geometry>
+      <material name="light_gray"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 -0.2" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.08 0.08 0.4"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Left elbow joint -->
+  <joint name="l_elbow_joint" type="revolute">
+    <parent link="l_upper_arm"/>
+    <child link="l_lower_arm"/>
+    <origin xyz="0 0 -0.4" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="0.0" upper="2.0" effort="15" velocity="1.5"/>
+    <dynamics damping="0.1" friction="0.1"/>
+  </joint>
+
+  <link name="l_lower_arm">
+    <inertial>
+      <mass value="1.5"/>
+      <origin xyz="0 0 -0.15" rpy="0 0 0"/>
+      <inertia
+        ixx="0.01" ixy="0.0" ixz="0.0"
+        iyy="0.05" iyz="0.0"
+        izz="0.05"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 -0.15" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.07 0.07 0.3"/>
+      </geometry>
+      <material name="light_gray"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 -0.15" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.07 0.07 0.3"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Left wrist (fixed for simplicity) -->
+  <joint name="l_wrist_joint" type="fixed">
+    <parent link="l_lower_arm"/>
+    <child link="l_hand"/>
+    <origin xyz="0 0 -0.3" rpy="0 0 0"/>
+  </joint>
+
+  <link name="l_hand">
+    <inertial>
+      <mass value="0.5"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia
+        ixx="0.001" ixy="0.0" ixz="0.0"
+        iyy="0.001" iyz="0.0"
+        izz="0.001"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.06 0.06 0.06"/>
+      </geometry>
+      <material name="skin"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.06 0.06 0.06"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- ============= RIGHT ARM (Mirrored) ============= -->
+  <!-- Right shoulder -->
+  <joint name="r_shoulder_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="r_upper_arm"/>
+    <origin xyz="-0.15 0.15 0.5" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-1.5708" upper="1.5708" effort="20" velocity="1.5"/>
+    <dynamics damping="0.1" friction="0.1"/>
+  </joint>
+
+  <link name="r_upper_arm">
+    <inertial>
+      <mass value="2.0"/>
+      <origin xyz="0 0 -0.2" rpy="0 0 0"/>
+      <inertia
+        ixx="0.02" ixy="0.0" ixz="0.0"
+        iyy="0.08" iyz="0.0"
+        izz="0.08"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 -0.2" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.08 0.08 0.4"/>
+      </geometry>
+      <material name="light_gray"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 -0.2" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.08 0.08 0.4"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Right elbow -->
+  <joint name="r_elbow_joint" type="revolute">
+    <parent link="r_upper_arm"/>
+    <child link="r_lower_arm"/>
+    <origin xyz="0 0 -0.4" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="0.0" upper="2.0" effort="15" velocity="1.5"/>
+    <dynamics damping="0.1" friction="0.1"/>
+  </joint>
+
+  <link name="r_lower_arm">
+    <inertial>
+      <mass value="1.5"/>
+      <origin xyz="0 0 -0.15" rpy="0 0 0"/>
+      <inertia
+        ixx="0.01" ixy="0.0" ixz="0.0"
+        iyy="0.05" iyz="0.0"
+        izz="0.05"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 -0.15" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.07 0.07 0.3"/>
+      </geometry>
+      <material name="light_gray"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 -0.15" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.07 0.07 0.3"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Right wrist -->
+  <joint name="r_wrist_joint" type="fixed">
+    <parent link="r_lower_arm"/>
+    <child link="r_hand"/>
+    <origin xyz="0 0 -0.3" rpy="0 0 0"/>
+  </joint>
+
+  <link name="r_hand">
+    <inertial>
+      <mass value="0.5"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia
+        ixx="0.001" ixy="0.0" ixz="0.0"
+        iyy="0.001" iyz="0.0"
+        izz="0.001"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.06 0.06 0.06"/>
+      </geometry>
+      <material name="skin"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.06 0.06 0.06"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- ============= LEFT LEG ============= -->
+  <!-- Left hip joint -->
+  <joint name="l_hip_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="l_upper_leg"/>
+    <origin xyz="0.075 0 0" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-0.785" upper="0.785" effort="25" velocity="1.5"/>
+    <dynamics damping="0.1" friction="0.1"/>
+  </joint>
+
+  <link name="l_upper_leg">
+    <inertial>
+      <mass value="4.0"/>
+      <origin xyz="0 0 -0.2" rpy="0 0 0"/>
+      <inertia
+        ixx="0.05" ixy="0.0" ixz="0.0"
+        iyy="0.15" iyz="0.0"
+        izz="0.15"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 -0.2" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.1 0.1 0.4"/>
+      </geometry>
+      <material name="dark_gray"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 -0.2" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.1 0.1 0.4"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Left knee -->
+  <joint name="l_knee_joint" type="revolute">
+    <parent link="l_upper_leg"/>
+    <child link="l_lower_leg"/>
+    <origin xyz="0 0 -0.4" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="0.0" upper="2.0" effort="20" velocity="1.5"/>
+    <dynamics damping="0.1" friction="0.1"/>
+  </joint>
+
+  <link name="l_lower_leg">
+    <inertial>
+      <mass value="2.5"/>
+      <origin xyz="0 0 -0.2" rpy="0 0 0"/>
+      <inertia
+        ixx="0.03" ixy="0.0" ixz="0.0"
+        iyy="0.08" iyz="0.0"
+        izz="0.08"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 -0.2" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.09 0.09 0.4"/>
+      </geometry>
+      <material name="dark_gray"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 -0.2" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.09 0.09 0.4"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Left foot -->
+  <joint name="l_ankle_joint" type="fixed">
+    <parent link="l_lower_leg"/>
+    <child link="l_foot"/>
+    <origin xyz="0 0 -0.4" rpy="0 0 0"/>
+  </joint>
+
+  <link name="l_foot">
+    <inertial>
+      <mass value="1.0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia
+        ixx="0.01" ixy="0.0" ixz="0.0"
+        iyy="0.02" iyz="0.0"
+        izz="0.02"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.1 0.15 0.05"/>
+      </geometry>
+      <material name="dark_gray"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.1 0.15 0.05"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- ============= RIGHT LEG (Mirrored) ============= -->
+  <!-- Right hip -->
+  <joint name="r_hip_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="r_upper_leg"/>
+    <origin xyz="-0.075 0 0" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-0.785" upper="0.785" effort="25" velocity="1.5"/>
+    <dynamics damping="0.1" friction="0.1"/>
+  </joint>
+
+  <link name="r_upper_leg">
+    <inertial>
+      <mass value="4.0"/>
+      <origin xyz="0 0 -0.2" rpy="0 0 0"/>
+      <inertia
+        ixx="0.05" ixy="0.0" ixz="0.0"
+        iyy="0.15" iyz="0.0"
+        izz="0.15"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 -0.2" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.1 0.1 0.4"/>
+      </geometry>
+      <material name="dark_gray"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 -0.2" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.1 0.1 0.4"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Right knee -->
+  <joint name="r_knee_joint" type="revolute">
+    <parent link="r_upper_leg"/>
+    <child link="r_lower_leg"/>
+    <origin xyz="0 0 -0.4" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="0.0" upper="2.0" effort="20" velocity="1.5"/>
+    <dynamics damping="0.1" friction="0.1"/>
+  </joint>
+
+  <link name="r_lower_leg">
+    <inertial>
+      <mass value="2.5"/>
+      <origin xyz="0 0 -0.2" rpy="0 0 0"/>
+      <inertia
+        ixx="0.03" ixy="0.0" ixz="0.0"
+        iyy="0.08" iyz="0.0"
+        izz="0.08"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 -0.2" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.09 0.09 0.4"/>
+      </geometry>
+      <material name="dark_gray"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 -0.2" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.09 0.09 0.4"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Right foot -->
+  <joint name="r_ankle_joint" type="fixed">
+    <parent link="r_lower_leg"/>
+    <child link="r_foot"/>
+    <origin xyz="0 0 -0.4" rpy="0 0 0"/>
+  </joint>
+
+  <link name="r_foot">
+    <inertial>
+      <mass value="1.0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia
+        ixx="0.01" ixy="0.0" ixz="0.0"
+        iyy="0.02" iyz="0.0"
+        izz="0.02"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.1 0.15 0.05"/>
+      </geometry>
+      <material name="dark_gray"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.1 0.15 0.05"/>
+      </geometry>
+    </collision>
+  </link>
+
+</robot>

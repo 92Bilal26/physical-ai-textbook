@@ -1,0 +1,191 @@
+<?xml version="1.0"?>
+<!--
+Simple 2-Link Robot URDF Model
+================================
+
+This URDF describes a basic 2-DOF robot arm with:
+- Base link (fixed to world)
+- Link 1: First arm segment
+- Link 2: Second arm segment (end-effector)
+
+URDF Structure:
+  <robot>: Root element defining the entire robot
+    <link>: Rigid body with mass, geometry, and inertia
+    <joint>: Connection between two links with motion constraints
+
+Joint Types:
+  - revolute: Rotates around an axis (like a hinge, has limits)
+  - continuous: Rotates freely (no angle limits)
+  - fixed: No motion allowed (rigid connection)
+  - prismatic: Slides along an axis (linear motion)
+
+Usage:
+  visualize in RViz:
+    ros2 run rviz2 rviz2 -d config.rviz
+
+  validate URDF:
+    check_urdf simple_robot.urdf
+
+  launch in Gazebo:
+    ros2 launch simple_robot_description display.launch.py
+-->
+
+<robot name="simple_robot">
+
+  <!-- ============= BASE LINK ============= -->
+  <!-- The base link is the reference frame (usually mounted on the robot base) -->
+  <link name="base_link">
+    <inertial>
+      <!-- Mass of the base (in kg) -->
+      <mass value="2.0"/>
+      <!-- Origin of mass center relative to link frame -->
+      <origin xyz="0 0 0.05" rpy="0 0 0"/>
+      <!-- Inertia matrix (resistance to rotation) -->
+      <!-- For a solid cube: I = (1/12) * m * (width² + height²) -->
+      <inertia
+        ixx="0.0167" ixy="0.0" ixz="0.0"
+        iyy="0.0167" iyz="0.0"
+        izz="0.0167"/>
+    </inertial>
+
+    <!-- Visual appearance (how it looks) -->
+    <visual>
+      <origin xyz="0 0 0.05" rpy="0 0 0"/>
+      <geometry>
+        <!-- A box: size x, y, z (width, depth, height) -->
+        <box size="0.2 0.2 0.1"/>
+      </geometry>
+      <material name="gray">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
+    </visual>
+
+    <!-- Collision geometry (for physics simulation) -->
+    <collision>
+      <origin xyz="0 0 0.05" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.2 0.2 0.1"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- ============= JOINT 1 ============= -->
+  <!-- Connects base_link to link1 with a revolute joint (rotates around Z axis) -->
+  <joint name="joint_1" type="revolute">
+    <!-- Parent link: The link that doesn't move with this joint -->
+    <parent link="base_link"/>
+    <!-- Child link: The link that moves with this joint -->
+    <child link="link_1"/>
+
+    <!-- Origin: position and orientation of joint frame relative to parent link -->
+    <origin xyz="0 0 0.1" rpy="0 0 0"/>
+
+    <!-- Rotation axis in child link frame -->
+    <!-- xyz="0 0 1" means rotate around the Z axis (vertical) -->
+    <axis xyz="0 0 1"/>
+
+    <!-- Joint limits: minimum angle, maximum angle (in radians) -->
+    <!-- -π to π allows full rotation except the discontinuity -->
+    <limit lower="-3.14159" upper="3.14159" effort="10" velocity="1.0"/>
+
+    <!-- Dynamics: friction and damping -->
+    <dynamics damping="0.1" friction="0.1"/>
+  </joint>
+
+  <!-- ============= LINK 1 ============= -->
+  <!-- First arm segment (1 meter long) -->
+  <link name="link_1">
+    <inertial>
+      <!-- Lighter than base, elongated shape -->
+      <mass value="0.8"/>
+      <!-- Center of mass is at middle of the segment -->
+      <origin xyz="0.5 0 0" rpy="0 0 0"/>
+      <!-- Inertia for elongated box (easier to rotate around axis) -->
+      <inertia
+        ixx="0.0133" ixy="0.0" ixz="0.0"
+        iyy="0.0533" iyz="0.0"
+        izz="0.0533"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0.5 0 0" rpy="0 0 0"/>
+      <geometry>
+        <!-- Long box: 1m long, 0.05m thick -->
+        <box size="1.0 0.05 0.05"/>
+      </geometry>
+      <material name="blue">
+        <color rgba="0.0 0.0 1.0 1.0"/>
+      </material>
+    </visual>
+
+    <collision>
+      <origin xyz="0.5 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="1.0 0.05 0.05"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- ============= JOINT 2 ============= -->
+  <!-- Connects link_1 to link_2 with a revolute joint (rotates around Y axis) -->
+  <joint name="joint_2" type="revolute">
+    <parent link="link_1"/>
+    <child link="link_2"/>
+
+    <!-- Origin: at the end of link_1 (1m away from joint_1) -->
+    <origin xyz="1.0 0 0" rpy="0 0 0"/>
+
+    <!-- Rotate around Y axis (allows up/down pitch motion) -->
+    <axis xyz="0 1 0"/>
+
+    <!-- Joint limits: -90 degrees to +90 degrees -->
+    <limit lower="-1.5708" upper="1.5708" effort="10" velocity="1.0"/>
+
+    <dynamics damping="0.1" friction="0.1"/>
+  </joint>
+
+  <!-- ============= LINK 2 ============= -->
+  <!-- Second arm segment (end-effector or tool mount) -->
+  <link name="link_2">
+    <inertial>
+      <!-- Light segment for end-effector -->
+      <mass value="0.3"/>
+      <origin xyz="0.25 0 0" rpy="0 0 0"/>
+      <inertia
+        ixx="0.0025" ixy="0.0" ixz="0.0"
+        iyy="0.0083" iyz="0.0"
+        izz="0.0083"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0.25 0 0" rpy="0 0 0"/>
+      <geometry>
+        <!-- Shorter segment: 0.5m long (end-effector length) -->
+        <box size="0.5 0.03 0.03"/>
+      </geometry>
+      <material name="red">
+        <color rgba="1.0 0.0 0.0 1.0"/>
+      </material>
+    </visual>
+
+    <collision>
+      <origin xyz="0.25 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.5 0.03 0.03"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- ============= END-EFFECTOR FRAME ============= -->
+  <!-- Fixed frame at the tip of link_2 for tool attachment -->
+  <joint name="end_effector_joint" type="fixed">
+    <parent link="link_2"/>
+    <child link="end_effector"/>
+    <origin xyz="0.5 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <link name="end_effector">
+    <!-- No mass or geometry - just a reference frame for tool mounting -->
+  </link>
+
+</robot>
