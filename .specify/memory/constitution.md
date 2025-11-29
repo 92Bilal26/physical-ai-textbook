@@ -1,55 +1,827 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report:
+Version: 1.0.0 (Initial Constitution)
+Ratification Date: 2025-11-29
+Modified Principles: N/A (Initial creation)
+Added Sections: All core sections for Physical AI & Humanoid Robotics textbook
+Removed Sections: None
+Templates Status:
+  ✅ constitution.md - Created
+  ⚠ plan-template.md - Exists, may need alignment validation
+  ⚠ spec-template.md - Exists, may need alignment validation
+  ⚠ tasks-template.md - Exists, may need alignment validation
+Follow-up TODOs: None - all placeholders filled
+-->
 
-## Core Principles
+# Physical AI & Humanoid Robotics Textbook — Constitution
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+**Version:** 1.0.0
+**Ratified:** 2025-11-29
+**Last Amended:** 2025-11-29
+**Scope:** Educational textbook creation for Physical AI & Humanoid Robotics course
+**Audience:** AI Agents (Claude Code, Content Creators, Technical Reviewers), Human Authors, Hackathon Participants
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+**Design Philosophy**: This constitution governs the creation of a comprehensive, AI-native textbook that teaches Physical AI and Humanoid Robotics using spec-driven development methodology with Docusaurus, integrated RAG chatbot, and personalization features.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+---
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+## 0. Constitutional Persona: Educational Technology Systems Architect
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+**You are not merely a content generator.** You are an educational technology systems architect who designs learning experiences at the intersection of robotics, AI, and software development—creating a textbook that doesn't just explain concepts but enables hands-on, AI-assisted learning.
 
-### [PRINCIPLE_6_NAME]
+### Your Core Mission
 
+This project creates a **market-defining textbook** for Physical AI & Humanoid Robotics that:
+- Bridges the gap between digital intelligence and physical embodiment
+- Teaches ROS 2, Gazebo, Unity, and NVIDIA Isaac platforms
+- Integrates RAG chatbot for interactive learning
+- Supports personalization based on user background
+- Enables multilingual access (English/Urdu)
 
-[PRINCIPLE__DESCRIPTION]
+### Before Creating Any Content, Analyze:
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+**1. Technical Accuracy Requirements**
+- All ROS 2 code examples must be tested and executable
+- NVIDIA Isaac, Gazebo, Unity integrations must reflect current versions
+- Hardware specifications must match actual requirements
+- Simulation examples must be reproducible
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+**2. Learning Progression**
+- Students progress from theoretical foundations to hands-on simulation
+- Each module builds on previous knowledge systematically
+- Practical exercises integrate with theoretical concepts
+- Capstone project synthesizes all learning
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+**3. Integration Architecture**
+- Docusaurus serves as content platform
+- RAG chatbot embedded for contextual assistance
+- Better-Auth handles authentication and user profiling
+- OpenAI Agents/ChatKit SDKs power intelligent assistance
+- Neon Serverless Postgres + Qdrant Cloud manage data
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+---
 
-## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
+## Preamble: What This Textbook Is
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+**Title**: *Physical AI & Humanoid Robotics: From Simulation to Reality*
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Purpose**: A comprehensive technical textbook teaching the design, simulation, and deployment of humanoid robots capable of natural human interactions using industry-standard tools (ROS 2, Gazebo, Unity, NVIDIA Isaac).
+
+**Target Audience**:
+- Students entering robotics and Physical AI for the first time
+- Software developers transitioning to embodied intelligence
+- AI practitioners expanding into robotic applications
+- Engineering students in robotics, mechatronics, and AI programs
+
+**Why This Matters**: Humanoid robots represent the convergence of AI, mechanical engineering, and software development. As AI moves from digital spaces into the physical world, professionals who understand both the "brain" (AI systems) and the "body" (robotic hardware) will define the next era of human-robot collaboration.
+
+**Core Thesis**: Physical AI requires understanding the complete stack—from physics simulation and sensor fusion to neural network control and real-world deployment.
+
+---
+
+## I. The Paradigm Shift: From Digital AI to Embodied Intelligence
+
+### The Fundamental Transformation
+
+**Old World:** AI systems operated purely in digital environments—processing text, images, and data without physical constraints.
+
+**New World:** Physical AI systems must understand physics, navigate 3D space, manipulate objects, and interact safely with humans in shared environments.
+
+**What This Book Teaches:**
+
+This textbook does NOT teach just robotics theory or just AI algorithms. This textbook teaches students to **design embodied intelligent systems** that integrate:
+
+1. **Robotic Middleware (ROS 2)** → Communication backbone for distributed robotic systems
+2. **Physics Simulation (Gazebo, Unity, Isaac Sim)** → Digital twins for safe training and testing
+3. **AI Perception & Control (NVIDIA Isaac, Computer Vision)** → Intelligent decision-making and navigation
+4. **Natural Language Integration (VLA - Vision-Language-Action)** → Human-robot interaction through voice and vision
+
+### "Simulation Is the New Prototyping"
+
+In traditional robotics, the primary development cycle was **hardware-first**—building physical prototypes, testing, and iterating (expensive and slow).
+
+In modern Physical AI, the primary development cycle is **simulation-first**—creating digital twins, training AI agents in simulation, then transferring to hardware (sim-to-real).
+
+**The Paradigm Shift:**
+- **Old:** Build hardware → Test → Debug → Rebuild (months, high cost)
+- **New:** Simulate → Train AI → Validate → Deploy to hardware (weeks, lower cost)
+- **Bottom line:** Simulation quality determines deployment success
+
+Just as software developers use testing frameworks before production deployment, Physical AI developers use photorealistic simulation before hardware deployment.
+
+**This isn't a cost-cutting measure—it's a fundamental transformation of how robotic systems are developed in the AI era.**
+
+---
+
+## II. Core Principles
+
+### Principle 1: Hands-On Technical Accuracy
+
+**Every code example, simulation script, and configuration must be executable and tested.**
+
+**Requirements:**
+- All ROS 2 code must run on ROS 2 Humble/Iron
+- Gazebo simulations must execute with provided URDF/SDF files
+- NVIDIA Isaac examples must specify Isaac Sim version
+- Unity integrations must document Unity version and packages
+- Hardware specifications must reflect actual market availability and pricing
+
+**Verification Protocol:**
+- Code blocks include version information and dependencies
+- Simulation files are provided in accompanying repository
+- Screenshots/videos demonstrate actual execution
+- Error cases and troubleshooting guidance included
+
+**Rationale:** Students learning robotics face enough genuine complexity. Outdated or incorrect examples waste precious time and damage trust in the educational material.
+
+---
+
+### Principle 2: Progressive Complexity (Module-Based Learning)
+
+**Content follows a structured 4-module progression that builds competence systematically.**
+
+**Module Structure:**
+1. **Module 1: The Robotic Nervous System (ROS 2)**
+   - Foundation: ROS 2 nodes, topics, services, actions
+   - Integration: Python agents to ROS controllers via rclpy
+   - Robot Description: URDF for humanoid robots
+
+2. **Module 2: The Digital Twin (Gazebo & Unity)**
+   - Physics simulation: Gravity, collisions, dynamics
+   - Sensor simulation: LiDAR, depth cameras, IMUs
+   - Rendering: High-fidelity visualization in Unity
+
+3. **Module 3: The AI-Robot Brain (NVIDIA Isaac)**
+   - Isaac Sim: Photorealistic simulation and synthetic data
+   - Isaac ROS: Hardware-accelerated VSLAM and navigation
+   - Nav2: Path planning for bipedal movement
+
+4. **Module 4: Vision-Language-Action (VLA)**
+   - Voice commands: OpenAI Whisper integration
+   - Cognitive planning: LLMs for natural language to ROS actions
+   - Capstone: Autonomous humanoid responding to voice commands
+
+**Complexity Tiers:**
+- **Weeks 1-2:** Foundational concepts (manual exercises)
+- **Weeks 3-7:** ROS 2 development (guided practice)
+- **Weeks 8-10:** Advanced AI integration (supervised projects)
+- **Weeks 11-13:** Capstone synthesis (autonomous project)
+
+**Rationale:** Physical AI requires mastery of multiple complex systems. Progressive structure prevents cognitive overload while ensuring comprehensive coverage.
+
+---
+
+### Principle 3: Simulation-First Methodology
+
+**All robotic development begins in simulation before hardware deployment.**
+
+**Simulation Workflow:**
+1. **Design Phase:** Define robot specifications (URDF/SDF)
+2. **Simulation Phase:** Implement and test in Gazebo/Isaac Sim
+3. **AI Training Phase:** Train perception and control algorithms
+4. **Validation Phase:** Test edge cases and failure modes
+5. **Hardware Deployment Phase:** Transfer to physical robot (sim-to-real)
+
+**Required Simulation Elements:**
+- Physics accuracy (gravity, friction, collision dynamics)
+- Sensor realism (noise, latency, field of view)
+- Environmental variability (lighting, obstacles, terrain)
+- Performance metrics (success rate, computation time)
+
+**Rationale:** Simulation provides safe, repeatable, cost-effective environment for learning and experimentation. Students can test dangerous scenarios (robot falls, collisions) without hardware damage.
+
+---
+
+### Principle 4: AI-Native Workflow Integration
+
+**The textbook itself models AI-native development practices through spec-driven methodology.**
+
+**Specification-First Approach:**
+- Each chapter begins with learning objectives (specification)
+- Code examples reference specifications explicitly
+- Projects require spec.md before implementation
+- AI chatbot assists with specification refinement
+
+**SpecKit Plus Integration:**
+- Use `.specify/` directory structure
+- Maintain specs/, plans/, tasks/ organization
+- Create ADRs for significant architectural decisions
+- Generate PHRs for learning milestones
+
+**AI Collaboration:**
+- RAG chatbot provides contextual assistance within chapters
+- Students can query selected text for clarification
+- Better-Auth captures user background for personalized guidance
+- Chatbot suggests relevant hardware/software based on user context
+
+**Rationale:** Students learn not just robotics, but how to develop robotics applications using modern AI-assisted workflows—the methodology they'll use professionally.
+
+---
+
+### Principle 5: Hardware Reality and Accessibility
+
+**All hardware recommendations must reflect actual market availability, realistic pricing, and accessibility constraints.**
+
+**Hardware Specification Requirements:**
+1. **Workstation Requirements (Clearly Stated):**
+   - GPU: NVIDIA RTX 4070 Ti (12GB VRAM) minimum for Isaac Sim
+   - CPU: Intel Core i7 13th Gen+ or AMD Ryzen 9
+   - RAM: 64 GB DDR5 (32 GB absolute minimum)
+   - OS: Ubuntu 22.04 LTS (dual-boot acceptable)
+
+2. **Edge Computing Kit (Jetson-Based):**
+   - Brain: NVIDIA Jetson Orin Nano Super (8GB) - $249
+   - Vision: Intel RealSense D435i - $349
+   - Audio: ReSpeaker USB Mic Array v2.0 - $69
+   - Storage: 128GB microSD high-endurance - $30
+   - **Total:** ~$700 per student kit
+
+3. **Robot Hardware (Tiered Options):**
+   - **Option A (Budget):** Unitree Go2 Edu (~$1,800-$3,000) - quadruped proxy
+   - **Option B (Miniature):** Unitree G1 (~$16,000) - actual humanoid
+   - **Option C (Premium):** Unitree G1 with full SDK (~$16,000+)
+
+4. **Cloud Alternative (Operational Expenditure):**
+   - AWS g5.2xlarge instance: ~$1.50/hour
+   - Expected usage: 10 hours/week × 12 weeks = $180-$205
+   - Still requires local Jetson kit for edge deployment
+
+**Accessibility Considerations:**
+- Textbook must work with simulation-only setup (no physical robot required for core learning)
+- Cloud-based alternatives documented for students without high-end workstations
+- Open-source tools prioritized (ROS 2, Gazebo) over proprietary where possible
+- Hardware substitution guidance (alternatives to RealSense, Jetson)
+
+**Rationale:** Students need realistic expectations about hardware requirements. Transparency about costs enables informed decisions and prevents frustration from underpowered setups.
+
+---
+
+### Principle 6: Interactive Learning Through RAG Integration
+
+**The textbook includes an embedded RAG chatbot that provides contextual, intelligent assistance.**
+
+**RAG Chatbot Requirements:**
+
+**Core Functionality:**
+- Answer questions about chapter content using retrieval-augmented generation
+- Respond to queries about user-selected text specifically
+- Provide code examples and debugging assistance
+- Suggest next steps based on learning progress
+
+**Technical Architecture:**
+- **Backend:** FastAPI serving OpenAI Agents/ChatKit SDKs
+- **Vector Database:** Qdrant Cloud (free tier) for semantic search
+- **Relational Database:** Neon Serverless Postgres for user data
+- **Embedding Model:** OpenAI embeddings for content vectorization
+- **LLM:** GPT-4 for response generation with context
+
+**User Experience:**
+- Embedded chatbot interface in every chapter
+- Selection-based queries (highlight text → ask question)
+- Conversation history preserved per user session
+- Code examples executable in provided environments
+
+**Data Flow:**
+1. User selects text or asks question
+2. Selected text sent to backend as context
+3. RAG system retrieves relevant content from Qdrant
+4. LLM generates response using retrieved context + user query
+5. Response displayed in chat interface with citations
+
+**Privacy & Data Management:**
+- User queries logged for improvement (opt-in)
+- Authentication via Better-Auth
+- User background stored in Neon Postgres
+- Conversation history associated with authenticated user
+
+**Rationale:** Static textbooks cannot answer student questions. RAG-powered assistance provides personalized, context-aware help that scales without human instructor bottlenecks.
+
+---
+
+### Principle 7: Personalization Based on User Background
+
+**The textbook adapts content presentation based on user's software and hardware expertise.**
+
+**User Profiling (at Signup via Better-Auth):**
+
+**Background Questions:**
+1. **Programming Experience:**
+   - None / Beginner / Intermediate / Advanced
+   - Languages known: Python, TypeScript, C++, Other
+
+2. **Robotics Background:**
+   - None / Academic / Hobbyist / Professional
+   - Prior ROS experience: No / ROS 1 / ROS 2
+
+3. **Hardware Access:**
+   - Simulation only / Edge kit (Jetson) / Full robot / Cloud access
+   - GPU available: None / Consumer / Professional (RTX)
+
+4. **Learning Goals:**
+   - Academic course completion
+   - Professional skill development
+   - Research preparation
+   - Hobby exploration
+
+**Personalization Features:**
+
+**Content Adaptation (Chapter-Level):**
+- Beginner: More explanatory text, step-by-step walkthroughs
+- Intermediate: Balanced explanation with hands-on exercises
+- Advanced: Concise concepts with advanced challenges
+
+**Code Examples:**
+- Python-first for beginners (easier syntax)
+- C++ alternatives for advanced users (performance-critical)
+- TypeScript for web integration scenarios
+
+**Hardware-Specific Guidance:**
+- Simulation-only users: Full Gazebo/Isaac Sim workflows
+- Jetson users: Edge deployment optimization content
+- Full robot users: Sim-to-real transfer best practices
+- Cloud users: Instance selection and cost optimization
+
+**Personalization Button (Per Chapter):**
+- "Personalize This Chapter" button at chapter start
+- Dynamically adjusts:
+  - Terminology complexity
+  - Code example depth
+  - Prerequisite explanations
+  - Exercise difficulty
+
+**Implementation:**
+- User profile stored in Neon Postgres
+- Personalization preferences in Better-Auth session
+- Frontend reads profile and adjusts content rendering
+- RAG chatbot uses profile context for responses
+
+**Rationale:** Physical AI students have vastly different backgrounds. A freshman CS student needs different guidance than a professional software engineer transitioning to robotics. Personalization maximizes learning efficiency.
+
+---
+
+### Principle 8: Multilingual Accessibility (English/Urdu)
+
+**Content must be accessible in both English and Urdu to serve diverse learner populations.**
+
+**Translation Features:**
+
+**Core Functionality:**
+- "Translate to Urdu" button at start of each chapter
+- On-demand translation (not pre-translated static content)
+- Technical terms preserved in English with Urdu explanations
+- Code blocks remain in English (universal programming language)
+
+**Translation Quality:**
+- GPT-4 based translation with technical domain awareness
+- Human review for key chapters (quality assurance)
+- Consistent terminology across chapters (glossary-driven)
+- Cultural adaptation where appropriate
+
+**Technical Implementation:**
+- Button triggers API call to translation service
+- Translated content cached in user session
+- User can toggle between English/Urdu dynamically
+- Translation preference saved in user profile
+
+**Terminology Handling:**
+- Technical terms: "ROS 2 (Robot Operating System روبوٹ آپریٹنگ سسٹم)"
+- Acronyms: Preserved (URDF, VSLAM, IMU) with Urdu explanation
+- Code comments: Optional Urdu translations
+
+**Scope:**
+- Chapter content: Fully translatable
+- Code blocks: English only (industry standard)
+- UI elements: Bilingual
+- RAG chatbot: Responds in user's selected language
+
+**Rationale:** Language should not be a barrier to learning robotics. Pakistan and other Urdu-speaking regions have talented students who benefit from native-language technical education.
+
+---
+
+### Principle 9: Reusable Intelligence Through Claude Code Skills & Subagents
+
+**The textbook development process creates reusable intelligence components for future educational projects.**
+
+**Subagent Development:**
+
+**Content-Specific Subagents:**
+1. **ros2-code-generator:** Generates tested ROS 2 Python/C++ code
+2. **urdf-designer:** Creates valid URDF files for robots
+3. **simulation-validator:** Checks Gazebo/Isaac simulation configs
+4. **hardware-spec-advisor:** Recommends hardware based on requirements
+
+**General Education Subagents:**
+1. **exercise-designer:** Creates hands-on exercises from learning objectives
+2. **assessment-creator:** Generates quizzes and coding challenges
+3. **diagram-generator:** Produces technical diagrams and flowcharts
+4. **code-explainer:** Annotates code with pedagogical comments
+
+**Agent Skills:**
+
+**Technical Skills:**
+- `ros2-package-setup`: Automates ROS 2 package creation workflow
+- `gazebo-world-builder`: Guides simulation environment design
+- `isaac-sim-integration`: Templates for Isaac Sim integration
+- `nav2-configuration`: Configures Nav2 navigation stack
+
+**Pedagogical Skills:**
+- `learning-objective-mapper`: Maps content to Bloom's taxonomy
+- `prerequisite-checker`: Validates chapter dependency chains
+- `exercise-difficulty-calibrator`: Ensures progressive challenge
+- `code-example-tester`: Automates code validation
+
+**Organizational Value:**
+- Skills reusable across other Panaversity textbooks
+- Subagents applicable to future robotics courses
+- Accumulated intelligence compounds with each project
+- Community contribution to open-source educational tools
+
+**Rationale:** This hackathon project isn't just one textbook—it's a foundation for systematizing AI-native educational content creation. Reusable intelligence multiplies future productivity.
+
+---
+
+## III. Development Standards
+
+### Code Quality Standards
+
+**All code must meet production-quality standards:**
+
+**Testing Requirements:**
+- Unit tests for ROS 2 nodes (pytest for Python, gtest for C++)
+- Integration tests for multi-node systems
+- Simulation tests (automated Gazebo/Isaac runs)
+- Hardware compatibility validation (where applicable)
+
+**Documentation Requirements:**
+- Inline comments explaining non-obvious logic
+- Docstrings for all functions/classes (Google style for Python)
+- README files for complex packages
+- API documentation for custom interfaces
+
+**Style Guidelines:**
+- Python: PEP 8, Black formatter
+- C++: ROS 2 style guide, clang-format
+- TypeScript: ESLint + Prettier
+- Markdown: Consistent heading hierarchy, code block language tags
+
+---
+
+### Content Quality Standards
+
+**Written Content:**
+- Clear, concise technical writing
+- Active voice preferred over passive
+- Jargon defined on first use
+- Diagrams for complex concepts
+- Examples before abstractions
+
+**Visual Content:**
+- High-quality screenshots (1920x1080 minimum)
+- Annotated diagrams with clear labels
+- Consistent visual style across chapters
+- Dark mode compatible images
+
+**Interactive Content:**
+- Executable code snippets
+- Copy-paste friendly examples
+- Environment setup automation scripts
+- Troubleshooting common errors
+
+---
+
+### Security & Safety Standards
+
+**Chatbot Security:**
+- Input validation and sanitization
+- Rate limiting on API endpoints
+- User authentication required for personalized features
+- No exposure of API keys or secrets in frontend
+
+**Code Safety:**
+- No hardcoded credentials
+- Environment variables for configuration
+- Secure database connections (SSL/TLS)
+- SQL injection prevention (parameterized queries)
+
+**Physical Safety:**
+- Clear warnings about robot motion hazards
+- Emergency stop procedures documented
+- Simulation-first before hardware testing
+- Power safety for high-current robotics
+
+---
+
+## IV. Technical Architecture
+
+### Docusaurus Book Structure
+
+**Repository Organization:**
+```
+physical-ai-textbook/
+├── book/                    # Docusaurus site
+│   ├── docs/               # Chapter markdown files
+│   │   ├── module-1/       # ROS 2 chapters
+│   │   ├── module-2/       # Gazebo & Unity chapters
+│   │   ├── module-3/       # NVIDIA Isaac chapters
+│   │   └── module-4/       # VLA chapters
+│   ├── src/                # Custom React components
+│   │   ├── components/     # Chatbot UI, translation buttons
+│   │   └── theme/          # Customized Docusaurus theme
+│   └── static/             # Images, diagrams, assets
+├── chatbot-backend/        # FastAPI RAG service
+│   ├── app/
+│   │   ├── agents/         # OpenAI Agents integration
+│   │   ├── rag/            # Retrieval logic (Qdrant)
+│   │   ├── auth/           # Better-Auth integration
+│   │   └── api/            # REST endpoints
+│   └── tests/              # Backend tests
+├── code-examples/          # ROS 2, Gazebo, Isaac code
+│   ├── ros2_packages/
+│   ├── gazebo_worlds/
+│   └── isaac_scenarios/
+├── .specify/               # SpecKit Plus structure
+│   ├── memory/             # Constitution (this file)
+│   ├── templates/          # Spec/plan/tasks templates
+│   └── scripts/            # Automation scripts
+└── specs/                  # Chapter specifications
+```
+
+---
+
+### RAG Chatbot Architecture
+
+**Backend Stack:**
+- **Framework:** FastAPI (async, high-performance)
+- **LLM Integration:** OpenAI Agents SDK + ChatKit SDK
+- **Vector DB:** Qdrant Cloud (semantic search)
+- **Relational DB:** Neon Serverless Postgres
+- **Authentication:** Better-Auth (session management)
+
+**Data Pipeline:**
+1. **Ingestion:** Chapter markdown → text chunks (512 tokens)
+2. **Embedding:** OpenAI embeddings (text-embedding-3-small)
+3. **Indexing:** Store in Qdrant with metadata (chapter, section, difficulty)
+4. **Query:** User question → embed → search Qdrant → retrieve top-k
+5. **Generation:** LLM receives user query + retrieved context → response
+
+**API Endpoints:**
+- `POST /chat/query` - Main chat endpoint
+- `POST /chat/selection` - Query selected text
+- `GET /chat/history` - Retrieve conversation history
+- `POST /user/profile` - Update personalization settings
+- `POST /translate` - Translation service
+
+---
+
+### Authentication & Personalization
+
+**Better-Auth Integration:**
+- OAuth providers: GitHub, Google
+- Email/password authentication
+- Session management with JWT
+- User profile storage in Neon Postgres
+
+**Database Schema (Simplified):**
+```sql
+users (
+  id UUID PRIMARY KEY,
+  email TEXT UNIQUE,
+  name TEXT,
+  created_at TIMESTAMP
+)
+
+user_profiles (
+  user_id UUID REFERENCES users(id),
+  programming_level TEXT,
+  robotics_background TEXT,
+  hardware_access TEXT[],
+  preferred_language TEXT,
+  personalization_preferences JSONB
+)
+
+chat_history (
+  id UUID PRIMARY KEY,
+  user_id UUID REFERENCES users(id),
+  query TEXT,
+  response TEXT,
+  selected_text TEXT,
+  chapter_id TEXT,
+  timestamp TIMESTAMP
+)
+```
+
+---
+
+## V. Development Workflow
+
+### Spec-Driven Chapter Creation
+
+**1. Specification Phase:**
+- Create `specs/[module-name]/[chapter-name]/spec.md`
+- Define learning objectives, prerequisites, key concepts
+- Identify hardware/software requirements
+- Specify exercises and assessments
+
+**2. Planning Phase:**
+- Create `specs/[module-name]/[chapter-name]/plan.md`
+- Break down into sections and subsections
+- Define code examples needed
+- Plan interactive elements (exercises, chatbot prompts)
+
+**3. Implementation Phase:**
+- Create `specs/[module-name]/[chapter-name]/tasks.md`
+- Write chapter markdown in `book/docs/`
+- Develop code examples in `code-examples/`
+- Test all code and simulations
+
+**4. Review Phase:**
+- Technical review: Code accuracy, execution validation
+- Content review: Clarity, pedagogy, completeness
+- AI agent review: RAG chatbot can answer chapter questions
+- User testing: Personalization and translation functionality
+
+**5. Integration Phase:**
+- Embed chapter in Docusaurus site
+- Index chapter content in Qdrant
+- Configure personalization settings
+- Deploy translation capability
+
+---
+
+### Quality Assurance Checklist
+
+**Per Chapter:**
+- [ ] All code examples tested and executable
+- [ ] Screenshots/diagrams included and clear
+- [ ] Learning objectives stated explicitly
+- [ ] Prerequisites listed and validated
+- [ ] Exercises provided with solutions
+- [ ] RAG chatbot can answer chapter-specific questions
+- [ ] Personalization button functional
+- [ ] Translation to Urdu complete and reviewed
+- [ ] Links and references valid
+- [ ] Spelling and grammar checked
+
+**Per Module:**
+- [ ] Capstone project integrates module concepts
+- [ ] Module learning objectives achieved
+- [ ] Progression logic validated
+- [ ] Hardware requirements clearly documented
+
+**Entire Book:**
+- [ ] RAG chatbot operational across all chapters
+- [ ] Authentication and user profiling working
+- [ ] Personalization effective for different user types
+- [ ] Translation consistent across chapters
+- [ ] Deployed successfully to GitHub Pages or Vercel
+- [ ] Repository public and well-documented
+
+---
+
+## VI. Hackathon Deliverables
+
+### Core Requirements (100 Points)
+
+**1. AI/Spec-Driven Book Creation (40 points):**
+- [ ] Docusaurus-based textbook deployed to GitHub Pages/Vercel
+- [ ] Covers all 4 modules comprehensively
+- [ ] Created using SpecKit Plus and Claude Code
+- [ ] Specifications in `.specify/` directory
+- [ ] Clean, professional presentation
+
+**2. Integrated RAG Chatbot (60 points):**
+- [ ] FastAPI backend with OpenAI Agents/ChatKit SDKs
+- [ ] Qdrant Cloud vector database integration
+- [ ] Neon Serverless Postgres for user data
+- [ ] Answers general questions about book content
+- [ ] Answers questions about user-selected text
+- [ ] Embedded in book with good UX
+- [ ] Functional and responsive
+
+### Bonus Points (Up to 200 Additional Points)
+
+**3. Reusable Intelligence via Subagents/Skills (50 points):**
+- [ ] Created and used Claude Code subagents
+- [ ] Developed reusable agent skills
+- [ ] Documented in `.claude/skills/` or similar
+- [ ] Demonstrable productivity impact
+
+**4. Better-Auth Signup/Signin with Profiling (50 points):**
+- [ ] Better-Auth authentication implemented
+- [ ] Signup collects software/hardware background
+- [ ] User profiles stored and utilized
+- [ ] Secure session management
+
+**5. Content Personalization (50 points):**
+- [ ] "Personalize This Chapter" button functional
+- [ ] Content adapts based on user profile
+- [ ] Personalization meaningful and noticeable
+- [ ] Works across multiple chapters
+
+**6. Urdu Translation (50 points):**
+- [ ] "Translate to Urdu" button functional
+- [ ] Quality translation of technical content
+- [ ] Consistent terminology
+- [ ] Dynamic toggle between languages
+
+---
+
+### Submission Requirements
+
+**GitHub Repository:**
+- Public repository with clear README
+- All source code (book, backend, examples)
+- Deployment instructions
+- Architecture documentation
+
+**Deployed Book:**
+- Live URL (GitHub Pages or Vercel)
+- Fully functional chatbot
+- Authentication working (if implemented)
+- Responsive design
+
+**Demo Video (Under 90 Seconds):**
+- Book navigation demonstration
+- RAG chatbot in action (general + selected text queries)
+- Personalization feature (if implemented)
+- Translation feature (if implemented)
+- Code examples and simulations
+
+**WhatsApp Number:**
+- For potential live presentation invitation
+
+---
+
+## VII. Success Metrics
+
+### Educational Effectiveness
+
+**This textbook succeeds when students can:**
+- [ ] Explain Physical AI concepts clearly
+- [ ] Set up ROS 2 development environment independently
+- [ ] Create working Gazebo simulations
+- [ ] Integrate NVIDIA Isaac for AI-powered robotics
+- [ ] Complete capstone project: voice-controlled autonomous humanoid
+
+### Technical Excellence
+
+**This project succeeds when:**
+- [ ] All code examples execute without errors
+- [ ] RAG chatbot provides accurate, helpful responses
+- [ ] Personalization enhances learning experience
+- [ ] Translation maintains technical accuracy
+- [ ] Deployment is stable and performant
+
+### Innovation & Impact
+
+**This project stands out when:**
+- [ ] RAG integration is seamless and valuable
+- [ ] Personalization meaningfully adapts content
+- [ ] Reusable intelligence demonstrates future scalability
+- [ ] Code quality and documentation exemplary
+- [ ] Presentation compelling and professional
+
+---
+
+## VIII. Governance
+
+### Constitutional Authority
+
+**This constitution governs all aspects of textbook development.**
+
+**Precedence:**
+1. This constitution (principles and standards)
+2. Course requirements (modules, learning outcomes)
+3. Technical specifications (ROS 2, NVIDIA Isaac, etc.)
+4. Hackathon requirements (deliverables, deadlines)
+
+### Amendment Process
+
+**For Clarifications:**
+- Edit directly, increment PATCH version (1.0.0 → 1.0.1)
+- Document in Sync Impact Report
+- Commit with descriptive message
+
+**For Substantive Changes:**
+- Create ADR documenting rationale
+- Increment MINOR/MAJOR version (1.0.0 → 1.1.0 or 2.0.0)
+- Update impacted templates
+- Migration guidance if needed
+
+---
+
+## IX. Conclusion
+
+This constitution establishes the governance framework for creating a comprehensive, AI-native textbook on Physical AI and Humanoid Robotics. By adhering to these principles and standards, the project will:
+
+1. **Educate effectively** through progressive, hands-on learning
+2. **Integrate AI assistance** via RAG chatbot and personalization
+3. **Ensure technical accuracy** through rigorous testing and validation
+4. **Support accessibility** via translation and personalization
+5. **Demonstrate innovation** through reusable intelligence and modern architecture
+
+**The goal is not just to complete a hackathon submission, but to create a market-defining educational resource that sets the standard for AI-native technical textbooks in robotics education.**
+
+---
+
+**Version:** 1.0.0 | **Ratified:** 2025-11-29 | **Last Amended:** 2025-11-29
