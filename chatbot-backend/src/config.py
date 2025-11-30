@@ -2,6 +2,7 @@
 
 import os
 from pydantic_settings import BaseSettings
+from pydantic import field_validator
 from typing import Optional
 
 
@@ -21,21 +22,18 @@ class Settings(BaseSettings):
     qdrant_api_key: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.vqvmDOArrALD9g9cnjE-p0XLeGgMqq_2woueguJcw_k"
     qdrant_collection_name: str = "textbook_content"
 
-    # Gemini LLM
-    gemini_api_key: str = "AIzaSyBeFQ-wHqHRti3-Du0avcJtGo5TDIHkomM"
-    gemini_model: str = "gemini-pro"
+    # OpenAI API
+    openai_api_key: str = os.getenv("OPENAI_API_KEY", "")
+    openai_model: str = os.getenv("OPENAI_MODEL", "gpt-4")
+    openai_embedding_model: str = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
 
     # Application
     environment: str = os.getenv("ENVIRONMENT", "development")
     debug: bool = os.getenv("DEBUG", "true").lower() == "true"
     log_level: str = os.getenv("LOG_LEVEL", "INFO")
 
-    # CORS
-    allowed_origins: list = [
-        "http://localhost:3000",
-        "http://localhost:8000",
-        "https://92bilal26.github.io",
-    ]
+    # CORS - Use string by default, convert to list via validator
+    allowed_origins: list = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8000,https://92bilal26.github.io")
 
     # Session Configuration
     session_expiry_days: int = 30
@@ -53,6 +51,15 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = False
+        extra = "ignore"  # Ignore extra fields from .env
+
+    @field_validator("allowed_origins", mode="before")
+    @classmethod
+    def parse_origins(cls, v):
+        """Parse CORS origins from string"""
+        if isinstance(v, str):
+            return [o.strip() for o in v.split(",") if o.strip()]
+        return v if isinstance(v, list) else []
 
 
 # Create global settings instance

@@ -10,21 +10,22 @@ psycopg2-binary==2.9.9
 SQLAlchemy==2.0.23
 alembic==1.13.1
 
-# Vector & ML
-sentence-transformers==2.2.2
-qdrant-client==2.7.0
-google-generativeai==0.3.0
+# OpenAI & Vector DB
+openai==1.29.0
+qdrant-client==1.16.1
 
 # Async & HTTP
 aiohttp==3.9.1
 httpx==0.25.2
 python-dotenv==1.0.0
 
-# Testing
+# Testing (optional - can be installed separately for development)
 pytest==7.4.3
 pytest-asyncio==0.21.1
 pytest-cov==4.1.0
-httpx-mock==0.3.0
+pytest-mock==3.12.0
+httpx==0.25.2
+faker==20.1.0
 
 # Development
 black==23.12.1
@@ -33,6 +34,10 @@ mypy==1.7.1
 
 # Logging & Monitoring
 python-json-logger==2.0.7
+prometheus-client==0.19.0
+
+# Caching
+redis==5.0.1
 
 # Optional: Security & Production
 gunicorn==21.2.0

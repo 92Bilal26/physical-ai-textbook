@@ -1,194 +1,75 @@
-"""RAG (Retrieval-Augmented Generation) orchestration service."""
+"""RAG (Retrieval-Augmented Generation) pipeline service"""
 
+from .openai_service import OpenAIService
+from .qdrant_service import QdrantService
+from .cache_service import CacheService
 import logging
-from typing import List, Tuple
-from datetime import datetime, timedelta
-
-from ..models.schemas import CitationSchema
-from ..models.citation import Citation
-from ..config import settings
-from .qdrant_service import get_qdrant_service
-from .gemini_service import get_gemini_service
-from .embedding_service import get_embedding_service
-from ..utils.errors import HallucationDetectedException, RAGException
+from typing import Optional, List
 
 logger = logging.getLogger(__name__)
 
 
 class RAGService:
-    """Service for orchestrating RAG pipeline."""
+    """Main RAG service coordinating the pipeline"""
 
-    def __init__(self):
-        """Initialize RAG service with dependencies."""
-        self.qdrant_service = get_qdrant_service()
-        self.gemini_service = get_gemini_service()
-        self.embedding_service = get_embedding_service()
+    def __init__(self, openai_service: OpenAIService, qdrant_service: QdrantService, cache_service: CacheService):
+        self.openai = openai_service
+        self.qdrant = qdrant_service
+        self.cache = cache_service
 
-    async def process_query(
-        self,
-        question: str,
-        top_k: int = 5,
-        score_threshold: float = 0.5,
-    ) -> Tuple[str, List[Citation], float]:
-        """
-        Process a question through the RAG pipeline.
+    async def process_query(self, question: str, session_id: str, page_context: Optional[str] = None) -> dict:
+        """Process a query through the RAG pipeline"""
 
-        Args:
-            question: User question about textbook content
-            top_k: Number of top results to retrieve from vector search
-            score_threshold: Minimum similarity score for results
+        cached_result = await self.cache.get_query_cache(question, session_id)
+        if cached_result:
+            logger.info(f"Cache hit for question")
+            return cached_result
 
-        Returns:
-            Tuple of (answer, citations, confidence_score)
-
-        Raises:
-            HallucationDetectedException: If answer contains hallucinations
-            RAGException: For service errors
-        """
         try:
-            logger.info(f"🔄 Processing RAG query: {question[:50]}...")
+            if not question or len(question) < 1 or len(question) > 500:
+                raise ValueError("Question must be 1-500 characters")
 
-            # Step 1: Embed question
-            question_embedding = await self.embedding_service.embed_text(question)
-            logger.info(f"✓ Generated question embedding ({len(question_embedding)} dims)")
-
-            # Step 2: Search for relevant content
-            search_results = await self.qdrant_service.search(
-                query_vector=question_embedding,
-                top_k=top_k,
-                score_threshold=score_threshold,
-            )
+            embedding = await self.openai.embed_text(question)
+            search_results = await self.qdrant.search(vector=embedding, limit=5, score_threshold=0.5)
 
             if not search_results:
-                logger.warning("⚠️  No relevant content found")
-                return (
-                    "I don't find this information in the textbook.",
-                    [],
-                    0.0,
-                )
+                return {"answer": "No relevant information found", "sources": [], "confidence": 0.0}
 
-            logger.info(f"✓ Retrieved {len(search_results)} search results")
+            context = self._build_context(search_results, page_context)
+            
+            system_prompt = "Answer based ONLY on provided context. Do not use external knowledge."
+            messages = [{"role": "user", "content": f"Context:\n{context}\n\nQuestion: {question}"}]
+            
+            answer = await self.openai.chat_completion(messages=messages, system_prompt=system_prompt)
+            citations = self._extract_citations(answer, search_results)
+            confidence = self._calculate_confidence(search_results)
 
-            # Step 3: Build context from search results
-            context = self._build_context(search_results)
-            logger.info(f"✓ Built context from {len(search_results)} chunks")
+            response = {"answer": answer, "sources": citations, "confidence": confidence, "session_id": session_id}
+            await self.cache.set_query_cache(question, session_id, response)
 
-            # Step 4: Generate answer with RAG constraints
-            answer = await self.gemini_service.generate_answer(
-                question=question,
-                context=context,
-                max_tokens=500,
-            )
-            logger.info(f"✓ Generated answer via Gemini")
+            return response
 
-            # Step 5: Validate against hallucinations
-            if settings.enable_hallucination_check:
-                await self._check_hallucination(answer, context)
-                logger.info("✓ Hallucination check passed")
-
-            # Step 6: Create citations
-            citations = self._create_citations(search_results)
-            confidence = self._calculate_confidence(citations)
-
-            logger.info(f"✓ Created {len(citations)} citations, confidence: {confidence:.2f}")
-            return answer, citations, confidence
-
-        except HallucationDetectedException:
+        except Exception as e:
+            logger.error(f"RAG pipeline error: {str(e)}")
             raise
-        except Exception as e:
-            logger.error(f"❌ RAG processing failed: {e}")
-            raise RAGException(f"RAG pipeline failed: {e}")
 
-    async def validate_scope(
-        self,
-        question: str,
-        context: str,
-    ) -> bool:
-        """
-        Validate that question scope is appropriate for context.
+    def _build_context(self, search_results: List[dict], page_context: Optional[str]) -> str:
+        """Build context from search results"""
+        parts = []
+        if page_context:
+            parts.append(f"Context: {page_context}")
+        for i, result in enumerate(search_results, 1):
+            payload = result.get("payload", {})
+            parts.append(f"[{i}] {payload.get('content', '')[:300]}")
+        return "\n".join(parts)
 
-        Args:
-            question: User question
-            context: Retrieved context
+    def _extract_citations(self, answer: str, search_results: List[dict]) -> List[dict]:
+        """Extract citations from answer and search results"""
+        return [{"id": r.get("id"), "score": r.get("score", 0), "payload": r.get("payload", {})} for r in search_results]
 
-        Returns:
-            True if question is in scope, False otherwise
-        """
-        try:
-            # In production, could use a dedicated relevance model
-            # For now, simple heuristic: question should be somewhat related to context
-            logger.info("Validating question scope...")
-            return True
-        except Exception as e:
-            logger.warning(f"Scope validation error: {e}")
-            return False
-
-    def _build_context(self, search_results: List[dict]) -> str:
-        """Build context string from search results."""
-        context_parts = []
-        for result in search_results:
-            chapter = result.get("chapter", "Unknown")
-            section = result.get("section", "Unknown")
-            content = result.get("content", "")
-            context_parts.append(
-                f"From Chapter '{chapter}', Section '{section}':\n{content}"
-            )
-        return "\n\n".join(context_parts)
-
-    async def _check_hallucination(self, answer: str, context: str) -> None:
-        """Check if answer contains hallucinations (uses knowledge outside context)."""
-        # Simple heuristic: check for phrases indicating made-up content
-        hallucination_phrases = [
-            "i believe",
-            "in my opinion",
-            "i think",
-            "i'm not sure",
-            "might be",
-            "could be",
-            "perhaps",
-            "based on my knowledge",
-        ]
-
-        answer_lower = answer.lower()
-        for phrase in hallucination_phrases:
-            if phrase in answer_lower:
-                logger.warning(f"Potential hallucination detected: '{phrase}'")
-                raise HallucationDetectedException(
-                    f"Answer contains uncertain language: '{phrase}'"
-                )
-
-    def _create_citations(self, search_results: List[dict]) -> List[Citation]:
-        """Create citation objects from search results."""
-        citations = []
-        for result in search_results:
-            citation = Citation(
-                id=None,  # Will be assigned when saved to database
-                message_id=None,  # Will be assigned after message creation
-                chapter=result.get("chapter", ""),
-                section=result.get("section", ""),
-                content_excerpt=result.get("content", "")[:500],
-                link=result.get("link"),
-                confidence_score=float(result.get("score", 0.5)),
-                expires_at=datetime.utcnow() + timedelta(days=settings.session_expiry_days),
-            )
-            citations.append(citation)
-        return citations
-
-    def _calculate_confidence(self, citations: List[Citation]) -> float:
-        """Calculate overall confidence score from citations."""
-        if not citations:
+    def _calculate_confidence(self, search_results: List[dict]) -> float:
+        """Calculate overall confidence from search results"""
+        if not search_results:
             return 0.0
-        scores = [c.confidence_score for c in citations]
+        scores = [result.get("score", 0) for result in search_results]
         return sum(scores) / len(scores)
-
-
-# Global instance
-_rag_service = None
-
-
-def get_rag_service() -> RAGService:
-    """Get or create RAG service instance."""
-    global _rag_service
-    if _rag_service is None:
-        _rag_service = RAGService()
-    return _rag_service

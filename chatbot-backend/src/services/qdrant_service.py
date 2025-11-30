@@ -1,108 +1,102 @@
-"""Qdrant vector database service for RAG retrieval."""
+"""Qdrant vector database service"""
 
-from typing import List, Dict, Any
-from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams, PointStruct
+from qdrant_client import AsyncQdrantClient
+from qdrant_client.models import PointStruct
+from typing import List, Optional
 import logging
-
-from ..config import settings
-from ..utils.errors import QdrantException
 
 logger = logging.getLogger(__name__)
 
 
 class QdrantService:
-    """Service for Qdrant vector database operations."""
+    """Service for Qdrant vector database operations"""
 
-    def __init__(self):
-        """Initialize Qdrant client."""
+    def __init__(self, url: str, api_key: str, collection_name: str = "textbook_content"):
+        self.url = url
+        self.api_key = api_key
+        self.collection_name = collection_name
+        self.client = AsyncQdrantClient(url=url, api_key=api_key)
+
+    async def health_check(self) -> bool:
+        """Check if Qdrant is healthy"""
         try:
-            self.client = QdrantClient(
-                url=settings.qdrant_url,
-                api_key=settings.qdrant_api_key,
-            )
-            logger.info(f"✓ Connected to Qdrant at {settings.qdrant_url}")
+            await self.client.api_key_managed
+            return True
         except Exception as e:
-            logger.error(f"✗ Failed to connect to Qdrant: {e}")
-            raise QdrantException(f"Qdrant connection failed: {e}")
+            logger.error(f"Qdrant health check failed: {str(e)}")
+            return False
 
     async def search(
         self,
-        query_vector: List[float],
-        top_k: int = 5,
+        vector: List[float],
+        limit: int = 5,
         score_threshold: float = 0.5
-    ) -> List[Dict[str, Any]]:
-        """Search for similar content chunks in Qdrant."""
+    ) -> List[dict]:
+        """Search for similar vectors in collection"""
         try:
-            results = self.client.search(
-                collection_name=settings.qdrant_collection_name,
-                query_vector=query_vector,
-                limit=top_k,
-                score_threshold=score_threshold,
+            results = await self.client.search(
+                collection_name=self.collection_name,
+                query_vector=vector,
+                limit=limit,
+                score_threshold=score_threshold
             )
 
-            # Format results
             formatted_results = []
             for result in results:
                 formatted_results.append({
                     "id": result.id,
                     "score": result.score,
-                    "chapter": result.payload.get("chapter", ""),
-                    "section": result.payload.get("section", ""),
-                    "content": result.payload.get("content", ""),
+                    "payload": result.payload if hasattr(result, 'payload') else {}
                 })
 
-            logger.info(f"✓ Qdrant search returned {len(formatted_results)} results")
             return formatted_results
 
         except Exception as e:
-            logger.error(f"✗ Qdrant search failed: {e}")
-            raise QdrantException(f"Search failed: {e}")
+            logger.error(f"Qdrant search error: {str(e)}")
+            raise
 
-    async def store_vector(
+    async def search_with_chapter_filter(
         self,
-        vector_id: int,
         vector: List[float],
-        payload: Dict[str, Any]
-    ) -> bool:
-        """Store vector in Qdrant."""
+        chapter: str,
+        limit: int = 5,
+        score_threshold: float = 0.5
+    ) -> List[dict]:
+        """Search with chapter filtering"""
         try:
-            point = PointStruct(
-                id=vector_id,
-                vector=vector,
-                payload=payload,
+            results = await self.client.search(
+                collection_name=self.collection_name,
+                query_vector=vector,
+                limit=limit,
+                score_threshold=score_threshold
             )
 
-            self.client.upsert(
-                collection_name=settings.qdrant_collection_name,
-                points=[point],
-            )
+            formatted_results = []
+            for result in results:
+                if result.payload.get("chapter") == chapter:
+                    formatted_results.append({
+                        "id": result.id,
+                        "score": result.score,
+                        "payload": result.payload
+                    })
+                if len(formatted_results) >= limit:
+                    break
 
-            logger.info(f"✓ Stored vector {vector_id} in Qdrant")
-            return True
+            return formatted_results
 
         except Exception as e:
-            logger.error(f"✗ Failed to store vector: {e}")
-            raise QdrantException(f"Store vector failed: {e}")
+            logger.error(f"Qdrant filtered search error: {str(e)}")
+            return await self.search(vector, limit, score_threshold)
 
-    async def health_check(self) -> bool:
-        """Check Qdrant health."""
+    async def get_collection_info(self) -> Optional[dict]:
+        """Get collection information"""
         try:
-            self.client.get_collections()
-            logger.info("✓ Qdrant health check passed")
-            return True
+            collection_info = await self.client.get_collection(self.collection_name)
+            return {
+                "name": self.collection_name,
+                "vectors_count": getattr(collection_info, 'vectors_count', 0),
+                "points_count": getattr(collection_info, 'points_count', 0)
+            }
         except Exception as e:
-            logger.error(f"✗ Qdrant health check failed: {e}")
-            return False
-
-
-# Global instance
-_qdrant_service = None
-
-
-def get_qdrant_service() -> QdrantService:
-    """Get or create Qdrant service instance."""
-    global _qdrant_service
-    if _qdrant_service is None:
-        _qdrant_service = QdrantService()
-    return _qdrant_service
+            logger.error(f"Qdrant collection info error: {str(e)}")
+            return None

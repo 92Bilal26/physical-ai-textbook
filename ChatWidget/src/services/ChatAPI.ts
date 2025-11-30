@@ -42,6 +42,13 @@ export class ChatAPI {
 
       if (!response.ok) {
         const error = await response.json();
+
+        // Handle rate limiting (429)
+        if (response.status === 429) {
+          const retryAfter = response.headers.get('Retry-After') || '60';
+          throw new Error(`Rate limited. Please try again in ${retryAfter} seconds.`);
+        }
+
         throw new Error(error.detail || `API error: ${response.status}`);
       }
 
@@ -79,6 +86,13 @@ export class ChatAPI {
 
       if (!response.ok) {
         const error = await response.json();
+
+        // Handle rate limiting (429)
+        if (response.status === 429) {
+          const retryAfter = response.headers.get('Retry-After') || '60';
+          throw new Error(`Rate limited. Please try again in ${retryAfter} seconds.`);
+        }
+
         throw new Error(error.detail || `API error: ${response.status}`);
       }
 

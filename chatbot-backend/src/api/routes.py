@@ -14,11 +14,11 @@ from ..models.message import Message, MessageRole
 from ..models.citation import Citation
 from ..config import settings
 from ..db import get_db
-from ..services.qdrant_service import get_qdrant_service
-from ..services.gemini_service import get_gemini_service
-from ..services.embedding_service import get_embedding_service
+from ..services.qdrant_service import QdrantService
+from ..services.openai_service import OpenAIService
 from ..services.session_service import get_session_service
-from ..services.selection_service import get_selection_service
+from ..services.rag_service import RAGService
+from ..services.cache_service import CacheService
 from ..utils.errors import (
     RAGException,
     InvalidSessionException,
@@ -83,66 +83,58 @@ async def query_endpoint(
         await db.flush()
         logger.info(f"✓ Created conversation {conversation_id}")
 
-        # Step 3: Embed the question
-        embedding_service = get_embedding_service()
-        question_embedding = await embedding_service.embed_text(request.question)
-        logger.info(f"✓ Generated question embedding ({len(question_embedding)} dimensions)")
+        # Step 3-5: Use RAGService for complete pipeline (embedding, search, generation)
+        cache_service = CacheService(redis_url=settings.redis_url)
+        await cache_service.initialize()
 
-        # Step 4: Search Qdrant for relevant content
-        qdrant_service = get_qdrant_service()
-        search_results = await qdrant_service.search(
-            query_vector=question_embedding,
-            top_k=5,
-            score_threshold=0.5,
+        openai_service = OpenAIService(
+            api_key=settings.openai_api_key,
+            model=settings.openai_model,
+            embedding_model=settings.openai_embedding_model,
+            cache_service=cache_service  # Pass cache service for embedding caching
+        )
+        qdrant_service = QdrantService(
+            url=settings.qdrant_url,
+            api_key=settings.qdrant_api_key,
+            collection_name=settings.qdrant_collection_name
         )
 
-        if not search_results:
+        rag_service = RAGService(openai_service, qdrant_service, cache_service)
+        rag_result = await rag_service.process_query(
+            question=request.question,
+            session_id=str(request.session_id),
+            page_context=request.page_context
+        )
+
+        answer = rag_result["answer"]
+        confidence = rag_result["confidence"]
+
+        # Convert RAG service results to Citation objects
+        citations: List[Citation] = []
+        if rag_result.get("sources"):
+            for src in rag_result["sources"]:
+                citation = Citation(
+                    id=uuid4(),
+                    message_id=None,
+                    chapter=src.get("chapter", ""),
+                    section=src.get("section", ""),
+                    content_excerpt=src.get("excerpt", "")[:500],
+                    link=None,
+                    confidence_score=float(src.get("confidence_score", 0.5)),
+                    expires_at=datetime.utcnow() + timedelta(days=settings.session_expiry_days),
+                )
+                citations.append(citation)
+
+        if not citations:
             logger.warning("⚠️  No relevant content found in Qdrant")
-            # Return a "not found" response
-            answer = "I don't find this information in the textbook."
-            confidence = 0.0
-            citations: List[Citation] = []
         else:
-            logger.info(f"✓ Retrieved {len(search_results)} results from Qdrant")
-
-            # Build context from search results
-            context = "\n\n".join([
-                f"Chapter {result['chapter']}, Section {result['section']}:\n{result['content']}"
-                for result in search_results
-            ])
-
-            # Step 5: Generate answer using Gemini with RAG constraints
-            gemini_service = get_gemini_service()
-            answer = await gemini_service.generate_answer(
-                question=request.question,
-                context=context,
-                max_tokens=500,
-            )
-            logger.info(f"✓ Generated answer via Gemini")
+            logger.info(f"✓ Generated answer via OpenAI with {len(citations)} citations")
 
             # Step 6: Check for hallucination if enabled
             if settings.enable_hallucination_check:
                 # Simple check: if answer contains knowledge outside context
                 # In production, could use dedicated hallucination detection model
                 logger.info("✓ Hallucination check passed")
-
-            # Step 7: Extract and validate citations
-            citations: List[Citation] = []
-            for idx, result in enumerate(search_results):
-                citation = Citation(
-                    id=uuid4(),
-                    message_id=None,  # Will be set after message is created
-                    chapter=result.get("chapter", ""),
-                    section=result.get("section", ""),
-                    content_excerpt=result.get("content", "")[:500],  # Truncate to 500 chars
-                    link=None,  # Link would be set from textbook metadata
-                    confidence_score=float(result.get("score", 0.5)),
-                    expires_at=datetime.utcnow() + timedelta(days=settings.session_expiry_days),
-                )
-                citations.append(citation)
-
-            confidence = sum([c.confidence_score for c in citations]) / len(citations) if citations else 0.0
-            logger.info(f"✓ Extracted {len(citations)} citations with confidence {confidence:.2f}")
 
         # Step 8: Store user message
         user_message = Message(
@@ -232,6 +224,13 @@ async def query_endpoint(
         await db.rollback()
         raise HTTPException(status_code=500, detail="Internal server error")
 
+    finally:
+        # Ensure cache service is closed
+        try:
+            await cache_service.close()
+        except Exception as e:
+            logger.warning(f"Error closing cache service: {e}")
+
 
 @router.post("/selection", response_model=QueryResponse)
 async def selection_endpoint(
@@ -284,15 +283,51 @@ async def selection_endpoint(
         await db.flush()
         logger.info(f"✓ Created selection conversation {conversation_id}")
 
-        # Step 3: Process selection question using selection service
-        selection_service = get_selection_service()
-        answer, citations, confidence = await selection_service.process_selection_question(
-            selected_text=request.selected_text,
-            question=request.question,
-            chapter=request.chapter,
-            section=getattr(request, 'section', ''),
+        # Step 3: Process selection question using RAG pipeline with selected text as context
+        cache_service = CacheService(redis_url=settings.redis_url)
+        await cache_service.initialize()
+
+        openai_service = OpenAIService(
+            api_key=settings.openai_api_key,
+            model=settings.openai_model,
+            embedding_model=settings.openai_embedding_model,
+            cache_service=cache_service  # Pass cache service for embedding caching
         )
-        logger.info(f"✓ Generated answer for selection question")
+        qdrant_service = QdrantService(
+            url=settings.qdrant_url,
+            api_key=settings.qdrant_api_key,
+            collection_name=settings.qdrant_collection_name
+        )
+
+        # Use selected text as page context to focus the RAG pipeline
+        selection_context = f"Focus on this selection: {request.selected_text[:500]}"
+        rag_service = RAGService(openai_service, qdrant_service, cache_service)
+        rag_result = await rag_service.process_query(
+            question=request.question,
+            session_id=str(request.session_id),
+            page_context=selection_context
+        )
+
+        answer = rag_result["answer"]
+        confidence = rag_result["confidence"]
+
+        # Convert RAG service results to Citation objects
+        citations: List[Citation] = []
+        if rag_result.get("sources"):
+            for src in rag_result["sources"]:
+                citation = Citation(
+                    id=uuid4(),
+                    message_id=None,
+                    chapter=request.chapter,  # Use chapter from request since selection is from specific chapter
+                    section=getattr(request, 'section', ''),
+                    content_excerpt=request.selected_text[:500],  # Use the selected text as excerpt
+                    link=None,
+                    confidence_score=float(src.get("score", confidence)),
+                    expires_at=datetime.utcnow() + timedelta(days=settings.session_expiry_days),
+                )
+                citations.append(citation)
+
+        logger.info(f"✓ Generated answer for selection question with {len(citations)} citations")
 
         # Step 4: Store user question message
         user_message = Message(
@@ -368,3 +403,10 @@ async def selection_endpoint(
         logger.error(f"❌ Unexpected error in selection endpoint: {e}", exc_info=True)
         await db.rollback()
         raise HTTPException(status_code=500, detail="Internal server error")
+
+    finally:
+        # Ensure cache service is closed
+        try:
+            await cache_service.close()
+        except Exception as e:
+            logger.warning(f"Error closing cache service: {e}")
