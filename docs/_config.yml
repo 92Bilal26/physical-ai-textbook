@@ -1,0 +1,37 @@
+title: RAG Chatbot Documentation
+description: Complete RAG Chatbot system with FastAPI backend and React frontend
+author: RAG Chatbot Project
+github_url: https://github.com/92Bilal26/physical-ai-textbook
+theme: jekyll-theme-minimal
+
+# Site settings
+url: "https://92Bilal26.github.io/physical-ai-textbook"
+baseurl: "/physical-ai-textbook"
+
+# Navigation
+navigation:
+  - text: Home
+    href: /
+  - text: Quick Start
+    href: /QUICK_START
+  - text: Deployment
+    href: /DEPLOYMENT_READY
+  - text: Project Status
+    href: /PROJECT_STATUS_PHASES_3_TO_6
+  - text: File Index
+    href: /INDEX
+  - text: GitHub
+    href: https://github.com/92Bilal26/physical-ai-textbook
+
+# Jekyll settings
+markdown: kramdown
+plugins:
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+exclude:
+  - .github
+  - .git
+  - .gitignore
+  - node_modules
+  - venv
