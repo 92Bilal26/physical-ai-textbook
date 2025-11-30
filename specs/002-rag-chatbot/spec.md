@@ -95,6 +95,8 @@ For each answer, users can see which textbook sections the chatbot referenced. T
 - **Empty or invalid selections**: What if a user selects formatting/whitespace or very short text? (Should prompt user to select more meaningful content)
 - **Network failures**: What if Qdrant or Gemini API is unavailable? (Show user-friendly error message and offer retry)
 - **High concurrency**: What if multiple users chat simultaneously? (System should handle without degradation)
+- **Qdrant rate limits exceeded**: What if Free Tier API rate limits are reached? (Gracefully degrade: notify user of temporary slowness, serve cached/basic results instead of failing)
+- **30-day expiration**: What happens to conversations after 30 days? (Auto-delete from Neon database; users notified before deletion for archived ones)
 
 ---
 
@@ -116,14 +118,19 @@ For each answer, users can see which textbook sections the chatbot referenced. T
 - **FR-012**: System MUST provide an obvious UI mechanism for users to select/highlight text for questions
 - **FR-013**: System MUST gracefully handle errors (API timeouts, database issues) with user-friendly messages
 - **FR-014**: System MUST support text selection from any textbook page (Markdown content in Docusaurus)
+- **FR-015**: System MUST support anonymous session tracking using browser localStorage/cookies (no login required)
+- **FR-016**: System MUST support optional user authentication for cross-device conversation sync
+- **FR-017**: System MUST auto-delete conversations older than 30 days to protect user privacy and manage storage costs
+- **FR-018**: System MUST gracefully degrade when Qdrant API rate limits are reached (notify user of slowness, offer cached/basic results)
 
 ### Key Entities
 
-- **Message**: Represents a single user question or chatbot response (content, timestamp, source_references, user_session_id)
-- **Conversation**: Groups related messages from a user session (session_id, created_at, updated_at, page_context)
+- **Message**: Represents a single user question or chatbot response (content, timestamp, source_references, user_session_id, expires_at)
+- **Conversation**: Groups related messages from a user session (session_id, created_at, updated_at, page_context, expires_at)
 - **TextbookContent**: Chunks of textbook content indexed in Qdrant (content_text, chapter, section, vector_embedding, metadata)
-- **UserSession**: Tracks a user's chat session (session_id, page_context, created_at, conversation_ids)
-- **Citation**: Links answers to source textbook content (answer_id, chapter, section_heading, content_excerpt, link)
+- **UserSession**: Tracks a user's chat session (session_id, anonymous_or_user_id, page_context, created_at, updated_at, conversation_ids, expires_at, browser_storage_id for anonymous sessions)
+- **UserAccount**: Optional user login for cross-device sync (user_id, email, created_at, synced_session_ids)
+- **Citation**: Links answers to source textbook content (answer_id, chapter, section_heading, content_excerpt, link, expires_at)
 
 ---
 
@@ -140,6 +147,8 @@ For each answer, users can see which textbook sections the chatbot referenced. T
 - **SC-007**: Chat widget loads on all textbook pages in under 3 seconds
 - **SC-008**: Conversation history persists correctly across all user sessions (verified through database queries)
 - **SC-009**: 85% of users rate the chatbot as "helpful for understanding content" (post-interaction survey)
+- **SC-010**: 100% of conversations older than 30 days are successfully deleted on schedule (verified through database audit)
+- **SC-011**: When Qdrant rate limits are exceeded, system gracefully degrades with user notification and continues functioning (no complete failures)
 
 ---
 
@@ -180,9 +189,12 @@ For each answer, users can see which textbook sections the chatbot referenced. T
 - Textbook content is already published on GitHub Pages (deployment from previous feature)
 - All 3 chapters of Module 1 are complete and available for indexing
 - Users asking questions are learning the content (not adversarial/testing hallucinations intentionally)
-- Browser cookies/session storage are enabled for conversation history
+- Browser cookies/session storage are enabled for anonymous conversation history (optional; no login required)
 - API credentials (Qdrant, Neon, Gemini) are securely managed via environment variables
 - Peak concurrent users will not exceed 100 at launch (scalability can be addressed in future iterations)
+- Users accept 30-day conversation retention policy (data auto-deletes after 30 days for privacy)
+- Optional user authentication is available for cross-device conversation sync (users can choose to login or remain anonymous)
+- Qdrant Free Tier has sufficient capacity for initial launch; if limits exceeded, system degrades gracefully with user notification
 
 ---
 
@@ -219,15 +231,13 @@ For each answer, users can see which textbook sections the chatbot referenced. T
 
 ---
 
-## Questions for Clarification
+## Clarifications
 
-All aspects of this feature have been defined with industry-standard defaults based on:
-- RAG best practices for educational chatbots
-- Docusaurus integration patterns
-- The provided API infrastructure (Qdrant, Neon, Gemini)
-- User feedback from similar educational products
+### Session 2025-11-30
 
-No critical clarifications are needed to proceed with specification.
+- Q: How should the system identify and track users for maintaining conversation history? → A: Hybrid approach - Optional login; if not logged in, use anonymous sessions; if logged in, sync history across devices
+- Q: How long should conversation history be retained before deletion? → A: 30-day retention - Conversations auto-delete after 30 days for privacy and storage efficiency
+- Q: How should the chatbot handle Qdrant Free Tier API rate limits or storage limits? → A: Graceful degradation with user notification - Inform user of temporary slowness and offer cached/basic results
 
 ---
 
