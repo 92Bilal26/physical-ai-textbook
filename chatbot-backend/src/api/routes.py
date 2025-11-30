@@ -8,7 +8,7 @@ from typing import List
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..models.schemas import QueryRequest, QueryResponse, CitationSchema
+from ..models.schemas import QueryRequest, QueryResponse, SelectionRequest, CitationSchema
 from ..models.conversation import Conversation
 from ..models.message import Message, MessageRole
 from ..models.citation import Citation
@@ -18,6 +18,7 @@ from ..services.qdrant_service import get_qdrant_service
 from ..services.gemini_service import get_gemini_service
 from ..services.embedding_service import get_embedding_service
 from ..services.session_service import get_session_service
+from ..services.selection_service import get_selection_service
 from ..utils.errors import (
     RAGException,
     InvalidSessionException,
@@ -228,5 +229,142 @@ async def query_endpoint(
 
     except Exception as e:
         logger.error(f"❌ Unexpected error: {e}", exc_info=True)
+        await db.rollback()
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.post("/selection", response_model=QueryResponse)
+async def selection_endpoint(
+    request: SelectionRequest,
+    db: AsyncSession = Depends(get_db),
+) -> QueryResponse:
+    """
+    Process question about selected text from textbook.
+
+    Flow:
+    1. Validate session exists
+    2. Validate selected text length (5-5000 chars)
+    3. Create conversation for selection question
+    4. Use SelectionService to process question about selection
+    5. Store user question and AI response with citations
+    6. Return answer focused on selected text
+
+    Args:
+        request: SelectionRequest with selected_text, question, session_id, chapter
+        db: Database session
+
+    Returns:
+        QueryResponse with answer, sources, session_id, message_id, confidence
+
+    Raises:
+        HTTPException 400: Invalid selection length or format
+        HTTPException 401: Invalid or expired session
+        HTTPException 422: Validation error
+        HTTPException 500: Service errors
+    """
+    try:
+        logger.info(f"📖 Processing selection question for session {request.session_id}")
+
+        # Step 1: Validate session
+        session_service = get_session_service()
+        is_valid = await session_service.is_session_valid(str(request.session_id))
+        if not is_valid:
+            logger.warning(f"Invalid session: {request.session_id}")
+            raise InvalidSessionException(f"Session {request.session_id} is invalid or expired")
+
+        # Step 2: Create conversation
+        conversation_id = uuid4()
+        conversation = Conversation(
+            id=conversation_id,
+            user_session_id=request.session_id,
+            page_context=f"Selection from {request.chapter}",
+            expires_at=datetime.utcnow() + timedelta(days=settings.session_expiry_days),
+        )
+        db.add(conversation)
+        await db.flush()
+        logger.info(f"✓ Created selection conversation {conversation_id}")
+
+        # Step 3: Process selection question using selection service
+        selection_service = get_selection_service()
+        answer, citations, confidence = await selection_service.process_selection_question(
+            selected_text=request.selected_text,
+            question=request.question,
+            chapter=request.chapter,
+            section=getattr(request, 'section', ''),
+        )
+        logger.info(f"✓ Generated answer for selection question")
+
+        # Step 4: Store user question message
+        user_message = Message(
+            id=uuid4(),
+            conversation_id=conversation_id,
+            role=MessageRole.USER,
+            content=f"Question about selection: {request.question}",
+            source_references=[{"selected_text": request.selected_text[:200]}],
+            expires_at=datetime.utcnow() + timedelta(days=settings.session_expiry_days),
+        )
+        db.add(user_message)
+        await db.flush()
+        logger.info(f"✓ Stored user question {user_message.id}")
+
+        # Step 5: Store assistant response message
+        assistant_message = Message(
+            id=uuid4(),
+            conversation_id=conversation_id,
+            role=MessageRole.ASSISTANT,
+            content=answer,
+            source_references=[c.dict() for c in citations],
+            expires_at=datetime.utcnow() + timedelta(days=settings.session_expiry_days),
+        )
+        db.add(assistant_message)
+        await db.flush()
+        logger.info(f"✓ Stored assistant response {assistant_message.id}")
+
+        # Step 6: Store citations
+        for citation in citations:
+            citation.message_id = assistant_message.id
+            citation.expires_at = datetime.utcnow() + timedelta(days=settings.session_expiry_days)
+            db.add(citation)
+        await db.flush()
+        logger.info(f"✓ Stored {len(citations)} citations for selection")
+
+        # Step 7: Commit transaction
+        await db.commit()
+        logger.info(f"✓ Selection question transaction committed")
+
+        # Step 8: Format response
+        citation_schemas = [
+            CitationSchema(
+                id=c.id,
+                chapter=c.chapter,
+                section=c.section,
+                content_excerpt=c.content_excerpt,
+                link=c.link,
+                confidence_score=c.confidence_score,
+            )
+            for c in citations
+        ]
+
+        response = QueryResponse(
+            answer=answer,
+            sources=citation_schemas,
+            session_id=request.session_id,
+            message_id=assistant_message.id,
+            confidence=confidence,
+        )
+        logger.info(f"✅ Selection question complete: {len(citation_schemas)} sources")
+        return response
+
+    except InvalidSessionException as e:
+        logger.error(f"❌ Session error: {e}")
+        raise HTTPException(status_code=401, detail=str(e))
+
+    except RAGException as e:
+        logger.error(f"❌ Selection service error: {e}")
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"Service error: {str(e)}")
+
+    except Exception as e:
+        logger.error(f"❌ Unexpected error in selection endpoint: {e}", exc_info=True)
         await db.rollback()
         raise HTTPException(status_code=500, detail="Internal server error")
