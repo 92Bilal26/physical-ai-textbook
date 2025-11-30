@@ -6,12 +6,15 @@ import logging
 
 from .config import settings
 from .models.schemas import HealthCheckResponse
+from .db import get_engine
 from .services.qdrant_service import get_qdrant_service
 from .services.gemini_service import get_gemini_service
+from .api.routes import router as chat_router
 
 # Configure logging
 logging.basicConfig(level=settings.log_level)
 logger = logging.getLogger(__name__)
+
 
 # Create FastAPI app
 app = FastAPI(
@@ -28,6 +31,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include routers
+app.include_router(chat_router)
 
 
 @app.on_event("startup")
