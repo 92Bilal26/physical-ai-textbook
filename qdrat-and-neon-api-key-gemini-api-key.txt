@@ -1,0 +1,77 @@
+qdrat-api-key:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.vqvmDOArrALD9g9cnjE-p0XLeGgMqq_2woueguJcw_k
+
+
+
+
+curl \
+    -X GET 'https://1521bc26-af63-4594-8df5-c4a2e64c549b.us-east4-0.gcp.cloud.qdrant.io:6333' \
+    --header 'api-key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.vqvmDOArrALD9g9cnjE-p0XLeGgMqq_2woueguJcw_k'
+
+--------
+grpcurl \
+    -import-path ./lib/api/src/grpc/proto/ \
+    -proto qdrant.proto -d '{}' \
+    -H "api-key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.vqvmDOArrALD9g9cnjE-p0XLeGgMqq_2woueguJcw_k" \
+    '1521bc26-af63-4594-8df5-c4a2e64c549b.us-east4-0.gcp.cloud.qdrant.io:6334' \
+    qdrant.Qdrant/HealthCheck
+----------
+from qdrant_client import QdrantClient
+
+qdrant_client = QdrantClient(
+    url="https://1521bc26-af63-4594-8df5-c4a2e64c549b.us-east4-0.gcp.cloud.qdrant.io:6333", 
+    api_key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.vqvmDOArrALD9g9cnjE-p0XLeGgMqq_2woueguJcw_k",
+)
+
+print(qdrant_client.get_collections())
+---------
+from qdrant_client import QdrantClient
+
+qdrant_client = QdrantClient(
+    url="https://1521bc26-af63-4594-8df5-c4a2e64c549b.us-east4-0.gcp.cloud.qdrant.io:6333", 
+    api_key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.vqvmDOArrALD9g9cnjE-p0XLeGgMqq_2woueguJcw_k",
+)
+
+print(qdrant_client.get_collections())
+------------
+import {QdrantClient} from '@qdrant/js-client-rest';
+
+const client = new QdrantClient({
+    url: 'https://1521bc26-af63-4594-8df5-c4a2e64c549b.us-east4-0.gcp.cloud.qdrant.io:6333',
+    apiKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.vqvmDOArrALD9g9cnjE-p0XLeGgMqq_2woueguJcw_k',
+});
+
+try {
+    const result = await client.getCollections();
+    console.log('List of collections:', result.collections);
+} catch (err) {
+    console.error('Could not get collections:', err);
+}
+-----------------
+use qdrant_client::Qdrant;
+
+#[tokio::main]
+async fn main() {
+  let client = Qdrant::from_url("https://1521bc26-af63-4594-8df5-c4a2e64c549b.us-east4-0.gcp.cloud.qdrant.io:6334")
+      .api_key("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.vqvmDOArrALD9g9cnjE-p0XLeGgMqq_2woueguJcw_k")
+      .build()
+      .unwrap();
+      
+  let collections_list = client.list_collections().await;
+  let _ = dbg!(collections_list);
+}
+
+--------------
+neno api key
+https://console.neon.tech/app/settings#api-keys
+Key name:physical-ai-textbook
+apikey:napi_ner6m5jaus3ld4p8151j37rwk53swz4ulin33gg7sj0wakao09hrkb3zhasktgje
+
+-----------------
+# Data API
+VITE_NEON_DATA_API_URL=https://ep-rapid-dust-a1k9et2k.apirest.ap-southeast-1.aws.neon.tech/neondb/rest/v1
+
+# Auth
+VITE_PUBLIC_STACK_PROJECT_ID=55735c79-ade5-4d2e-8b9d-ba52255ba93d
+VITE_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY=pck_sy9j0802z3hbjwjmtraenre1d4rxp5r7c4zec4xx280yr
+--------------
+gemini llm api key:AIzaSyBeFQ-wHqHRti3-Du0avcJtGo5TDIHkomM
