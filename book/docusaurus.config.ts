@@ -123,7 +123,7 @@ const config: Config = {
           items: [
             {
               label: 'Contributing Guide',
-              to: '/CONTRIBUTING.md',
+              href: 'https://github.com/92Bilal26/physical-ai-textbook/blob/main/CONTRIBUTING.md',
             },
             {
               label: 'ROS 2 Documentation',

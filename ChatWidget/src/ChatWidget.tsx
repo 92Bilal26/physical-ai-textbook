@@ -29,8 +29,11 @@ export interface ChatWidgetProps {
   onSessionChange?: (session: ChatSession) => void;
 }
 
+// Production backend URL - Update this after deploying to Render
+const PRODUCTION_API_URL = 'https://rag-chatbot-backend.onrender.com';
+
 export const ChatWidget: React.FC<ChatWidgetProps> = ({
-  apiUrl = 'http://localhost:8000',
+  apiUrl = PRODUCTION_API_URL,
   theme = 'light',
   position = 'bottom-right',
   width = '400px',

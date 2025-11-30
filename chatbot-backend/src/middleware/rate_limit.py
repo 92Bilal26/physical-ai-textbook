@@ -21,7 +21,7 @@ def get_rate_limiter() -> RateLimiter:
     if _rate_limiter is None:
         _rate_limiter = RateLimiter(
             max_requests=settings.rate_limit_requests,
-            window_seconds=settings.rate_limit_window
+            window_seconds=settings.rate_limit_window_seconds
         )
     return _rate_limiter
 

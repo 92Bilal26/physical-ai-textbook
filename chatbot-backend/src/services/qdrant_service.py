@@ -30,29 +30,34 @@ class QdrantService:
         self,
         vector: List[float],
         limit: int = 5,
-        score_threshold: float = 0.5
+        score_threshold: float = 0.0
     ) -> List[dict]:
         """Search for similar vectors in collection"""
         try:
-            results = await self.client.search(
+            logger.info(f"🔍 Searching Qdrant collection: {self.collection_name}")
+            
+            # Use query_points for newer qdrant-client versions
+            # Remove score_threshold to get all results
+            results = await self.client.query_points(
                 collection_name=self.collection_name,
-                query_vector=vector,
-                limit=limit,
-                score_threshold=score_threshold
+                query=vector,
+                limit=limit
             )
 
             formatted_results = []
-            for result in results:
+            for point in results.points:
+                logger.info(f"  Found: score={point.score:.3f}, content={str(point.payload.get('content', ''))[:50]}...")
                 formatted_results.append({
-                    "id": result.id,
-                    "score": result.score,
-                    "payload": result.payload if hasattr(result, 'payload') else {}
+                    "id": point.id,
+                    "score": point.score,
+                    "payload": point.payload if hasattr(point, 'payload') else {}
                 })
 
+            logger.info(f"✅ Qdrant returned {len(formatted_results)} results")
             return formatted_results
 
         except Exception as e:
-            logger.error(f"Qdrant search error: {str(e)}")
+            logger.error(f"❌ Qdrant search error: {str(e)}", exc_info=True)
             raise
 
     async def search_with_chapter_filter(
@@ -60,24 +65,24 @@ class QdrantService:
         vector: List[float],
         chapter: str,
         limit: int = 5,
-        score_threshold: float = 0.5
+        score_threshold: float = 0.3
     ) -> List[dict]:
         """Search with chapter filtering"""
         try:
-            results = await self.client.search(
+            results = await self.client.query_points(
                 collection_name=self.collection_name,
-                query_vector=vector,
+                query=vector,
                 limit=limit,
                 score_threshold=score_threshold
             )
 
             formatted_results = []
-            for result in results:
-                if result.payload.get("chapter") == chapter:
+            for point in results.points:
+                if point.payload.get("chapter") == chapter:
                     formatted_results.append({
-                        "id": result.id,
-                        "score": result.score,
-                        "payload": result.payload
+                        "id": point.id,
+                        "score": point.score,
+                        "payload": point.payload
                     })
                 if len(formatted_results) >= limit:
                     break

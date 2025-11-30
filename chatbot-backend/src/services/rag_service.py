@@ -29,18 +29,36 @@ class RAGService:
             if not question or len(question) < 1 or len(question) > 500:
                 raise ValueError("Question must be 1-500 characters")
 
+            logger.info(f"🔍 Generating embedding for: {question[:50]}...")
             embedding = await self.openai.embed_text(question)
-            search_results = await self.qdrant.search(vector=embedding, limit=5, score_threshold=0.5)
+            logger.info(f"✅ Embedding generated, dimension: {len(embedding)}")
+            
+            # Use lower threshold to get more results
+            logger.info(f"🔍 Searching Qdrant...")
+            search_results = await self.qdrant.search(vector=embedding, limit=5, score_threshold=0.1)
+            logger.info(f"✅ Found {len(search_results)} results")
 
             if not search_results:
-                return {"answer": "No relevant information found", "sources": [], "confidence": 0.0}
+                logger.warning("⚠️ No search results found")
+                # Still try to answer using OpenAI without context
+                system_prompt = "You are a helpful assistant for a ROS 2 and robotics textbook. Answer the question helpfully."
+                messages = [{"role": "user", "content": question}]
+                answer = await self.openai.chat_completion(messages=messages, system_prompt=system_prompt)
+                return {"answer": answer, "sources": [], "confidence": 0.0}
 
             context = self._build_context(search_results, page_context)
+            logger.info(f"📝 Built context with {len(context)} characters")
             
-            system_prompt = "Answer based ONLY on provided context. Do not use external knowledge."
-            messages = [{"role": "user", "content": f"Context:\n{context}\n\nQuestion: {question}"}]
+            system_prompt = """You are a helpful assistant for a Physical AI and Robotics textbook about ROS 2.
+Answer the question based on the provided context. Be helpful and informative.
+If the context doesn't contain relevant information, say so but still try to help."""
             
+            messages = [{"role": "user", "content": f"Context from textbook:\n{context}\n\nQuestion: {question}"}]
+            
+            logger.info(f"🤖 Calling OpenAI for answer...")
             answer = await self.openai.chat_completion(messages=messages, system_prompt=system_prompt)
+            logger.info(f"✅ Got answer: {answer[:100]}...")
+            
             citations = self._extract_citations(answer, search_results)
             confidence = self._calculate_confidence(search_results)
 
@@ -50,7 +68,7 @@ class RAGService:
             return response
 
         except Exception as e:
-            logger.error(f"RAG pipeline error: {str(e)}")
+            logger.error(f"❌ RAG pipeline error: {str(e)}", exc_info=True)
             raise
 
     def _build_context(self, search_results: List[dict], page_context: Optional[str]) -> str:

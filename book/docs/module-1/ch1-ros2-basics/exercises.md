@@ -221,7 +221,7 @@ See below for complete solution code.
 
 ---
 
-## Common Mistakes & Troubleshooting
+## Common Mistakes & Troubleshooting {#troubleshooting}
 
 ### "ModuleNotFoundError: No module named 'rclpy'"
 

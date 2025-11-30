@@ -18,9 +18,9 @@ class Settings(BaseSettings):
     database_max_overflow: int = int(os.getenv("DATABASE_MAX_OVERFLOW", "20"))
 
     # Qdrant Vector Database
-    qdrant_url: str = "https://1521bc26-af63-4594-8df5-c4a2e64c549b.us-east4-0.gcp.cloud.qdrant.io:6333"
-    qdrant_api_key: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.vqvmDOArrALD9g9cnjE-p0XLeGgMqq_2woueguJcw_k"
-    qdrant_collection_name: str = "textbook_content"
+    qdrant_url: str = os.getenv("QDRANT_URL", "https://1521bc26-af63-4594-8df5-c4a2e64c549b.us-east4-0.gcp.cloud.qdrant.io:6333")
+    qdrant_api_key: str = os.getenv("QDRANT_API_KEY", "")
+    qdrant_collection_name: str = os.getenv("QDRANT_COLLECTION_NAME", "textbook_content")
 
     # OpenAI API
     openai_api_key: str = os.getenv("OPENAI_API_KEY", "")
@@ -33,7 +33,10 @@ class Settings(BaseSettings):
     log_level: str = os.getenv("LOG_LEVEL", "INFO")
 
     # CORS - Use string by default, convert to list via validator
-    allowed_origins: list = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8000,https://92bilal26.github.io")
+    allowed_origins: list = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8000,https://92bilal26.github.io,https://92Bilal26.github.io")
+    
+    # Redis (optional for caching)
+    redis_url: str = os.getenv("REDIS_URL", "")
 
     # Session Configuration
     session_expiry_days: int = 30
@@ -52,6 +55,14 @@ class Settings(BaseSettings):
         env_file = ".env"
         case_sensitive = False
         extra = "ignore"  # Ignore extra fields from .env
+
+    @field_validator("openai_api_key")
+    @classmethod
+    def check_openai_api_key(cls, v):
+        """Check that OpenAI API key is set."""
+        if not v:
+            raise ValueError("OPENAI_API_KEY must be set")
+        return v
 
     @field_validator("allowed_origins", mode="before")
     @classmethod
