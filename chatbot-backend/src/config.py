@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     log_level: str = os.getenv("LOG_LEVEL", "INFO")
 
     # CORS - Use string by default, convert to list via validator
-    allowed_origins: list = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8000,https://92bilal26.github.io,https://92Bilal26.github.io")
+    allowed_origins: str = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8000,https://92bilal26.github.io,https://92Bilal26.github.io")
     
     # Redis (optional for caching)
     redis_url: str = os.getenv("REDIS_URL", "")
