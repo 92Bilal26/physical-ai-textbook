@@ -3,7 +3,7 @@
 import os
 from pydantic_settings import BaseSettings
 from pydantic import field_validator
-from typing import Optional
+from typing import Optional, Union
 
 
 class Settings(BaseSettings):
@@ -32,8 +32,8 @@ class Settings(BaseSettings):
     debug: bool = os.getenv("DEBUG", "true").lower() == "true"
     log_level: str = os.getenv("LOG_LEVEL", "INFO")
 
-    # CORS - Use string by default, convert to list via validator
-    allowed_origins: str = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8000,https://92bilal26.github.io,https://92Bilal26.github.io")
+    # CORS - Accept both string and list, convert to list via validator
+    allowed_origins: Union[str, list] = "http://localhost:3000,http://localhost:8000,https://92bilal26.github.io,https://92Bilal26.github.io"
     
     # Redis (optional for caching)
     redis_url: str = os.getenv("REDIS_URL", "")
