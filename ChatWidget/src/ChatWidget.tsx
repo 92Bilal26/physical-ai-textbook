@@ -30,7 +30,7 @@ export interface ChatWidgetProps {
 }
 
 // Production backend URL - Update this after deploying to Render
-const PRODUCTION_API_URL = 'https://rag-chatbot-backend.onrender.com';
+const PRODUCTION_API_URL = 'https://rag-chatbot-backend-0nqt.onrender.com';
 
 export const ChatWidget: React.FC<ChatWidgetProps> = ({
   apiUrl = PRODUCTION_API_URL,
