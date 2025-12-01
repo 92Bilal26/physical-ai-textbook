@@ -27,11 +27,7 @@ app = FastAPI(
     version="0.1.0",
 )
 
-# Add rate limiting middleware (before CORS to catch rate limit violations early)
-if settings.rate_limit_enabled:
-    app.add_middleware(RateLimitMiddleware)
-
-# Add CORS middleware
+# Add CORS middleware FIRST (must be before rate limiting to handle preflight requests)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allowed_origins,
@@ -39,6 +35,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Add rate limiting middleware (after CORS so preflight requests get CORS headers)
+if settings.rate_limit_enabled:
+    app.add_middleware(RateLimitMiddleware)
 
 # Include routers
 app.include_router(chat_router)
