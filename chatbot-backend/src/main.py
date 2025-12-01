@@ -50,6 +50,8 @@ async def startup_event():
     logger.info("🚀 Starting RAG Chatbot API...")
     logger.info(f"Environment: {settings.environment}")
     logger.info(f"Debug: {settings.debug}")
+    logger.info(f"CORS Allowed Origins: {settings.allowed_origins}")
+    logger.info(f"Allowed Origins Type: {type(settings.allowed_origins)}")
 
 
 @app.on_event("shutdown")
