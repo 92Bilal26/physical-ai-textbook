@@ -103,8 +103,9 @@ async function startServer() {
   }
 }
 
-console.log("Starting auth server...");
+// Ensure console output is written immediately
+process.stdout.write("Starting auth server...\n");
 startServer().catch(error => {
-  console.error("Fatal error:", error);
+  process.stderr.write(`Fatal error: ${JSON.stringify(error)}\n`);
   process.exit(1);
 });
