@@ -1,0 +1,264 @@
+# Dockerfile.example - FastAPI Docker Configuration for Render.com
+#
+# This is a production-ready Dockerfile optimized for Render.com deployment.
+# Copy this to your repository root as "Dockerfile" and customize as needed.
+#
+# Key optimizations:
+# 1. Multi-stage build (smaller final image)
+# 2. Dependency caching (faster rebuilds)
+# 3. Non-root user (security)
+# 4. Proper port exposure for Render
+#
+# Documentation:
+# - Render Docker: https://render.com/docs/docker
+# - Best practices: https://docs.docker.com/develop/dockerfile_best-practices/
+
+# ==================== Stage 1: Builder ====================
+
+FROM python:3.11-slim as builder
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements first (for layer caching)
+# If requirements.txt changes, only pip install layer is invalidated
+COPY requirements.txt .
+
+# Install dependencies in a virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+RUN pip install --no-cache-dir -r requirements.txt
+
+
+# ==================== Stage 2: Runtime ====================
+
+FROM python:3.11-slim
+
+# Set environment variables
+ENV PATH="/opt/venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+# Set working directory
+WORKDIR /app
+
+# Create non-root user for security
+RUN useradd -m -u 1000 appuser
+
+# Copy virtual environment from builder
+COPY --from=builder /opt/venv /opt/venv
+
+# Copy application code
+COPY . .
+
+# Change ownership to non-root user
+RUN chown -R appuser:appuser /app
+
+# Switch to non-root user
+USER appuser
+
+# Expose port (Render will bind to this)
+EXPOSE 8000
+
+# Health check for Docker
+# Render also calls the health endpoint, but this helps local development
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health').read()"
+
+# Run the application with Uvicorn
+# Render will inject environment variables automatically
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+# ==================== Configuration Notes ====================
+
+# PORT: Render injects PORT environment variable
+# If you need to use the PORT variable:
+#   CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "${PORT}"]
+# However, port 8000 works fine for Render
+
+# ENVIRONMENT VARIABLES: Set in render.yaml or Render dashboard
+# The container will have access to all variables you set in Render
+
+# DATABASE URL: Render auto-injects DATABASE_URL from PostgreSQL service
+# Your Pydantic settings (src/config.py) will load it automatically
+
+# BUILD CONTEXT: When building locally or on Render
+# - Dockerfile at repository root: docker build -t app .
+# - Dockerfile in subdirectory: docker build -f backend/Dockerfile -t app .
+
+
+# ==================== Dockerfile for Monorepo ====================
+
+# If your Dockerfile is in a subdirectory (monorepo):
+# Copy this and adjust paths:
+
+# COPY requirements.txt .
+# becomes:
+# COPY ./backend/requirements.txt .
+
+# COPY . .
+# becomes:
+# COPY ./backend .
+
+# In render.yaml, set:
+#   rootDir: ./backend
+#   dockerfilePath: ./Dockerfile
+
+# ==================== Adding Files from render.yaml ====================
+
+# To copy additional files during build, use render.yaml:
+
+# In render.yaml you can specify:
+#   envVars:
+#     - key: SOME_FILE
+#       fromFile: ./some-file.txt  # Render will copy this in
+
+# In Dockerfile, you can then:
+#   RUN echo "$SOME_FILE" > /app/file.txt
+
+
+# ==================== Requirements File ====================
+
+# Your requirements.txt should include:
+#   FastAPI>=0.104.0
+#   uvicorn[standard]>=0.24.0
+#   pydantic>=2.0.0
+#   sqlalchemy>=2.0.0
+#   psycopg2-binary>=2.9.9 (for PostgreSQL)
+#   python-dotenv>=1.0.0
+#   httpx>=0.25.0
+#   aiohttp>=3.9.0
+
+# Install specific versions for reproducibility:
+#   FastAPI==0.104.0
+#   uvicorn==0.24.0
+
+
+# ==================== Troubleshooting ====================
+
+"""
+Common Dockerfile errors on Render:
+
+1. "failed to build image"
+   → Check dockerfilePath in render.yaml
+   → Verify Dockerfile exists at that path
+   → Look at Render logs for actual error
+   → Run locally: docker build -t test .
+
+2. "No such file or directory" when copying
+   → requirements.txt must exist
+   → COPY path is relative to Dockerfile location
+   → For monorepo, set rootDir in render.yaml
+
+3. "Port already in use"
+   → Dockerfile exposes 8000, Render binds to it
+   → This is normal and correct
+
+4. "Command 'pip' not found"
+   → Virtual environment not activated in PATH
+   → Use: ENV PATH="/opt/venv/bin:$PATH"
+   → Or: RUN /opt/venv/bin/pip install -r requirements.txt
+
+5. "Health check failing"
+   → App doesn't start properly
+   → Check logs with: Render → Logs tab
+   → Check startup message in logs
+   → Verify environment variables are set
+
+6. "Application startup failed"
+   → Check Render logs for the error
+   → Most common: DATABASE_URL missing
+   → Second most common: OPENAI_API_KEY missing
+   → Third: Import error in src/ code
+
+Local testing before pushing to Render:
+
+   # Build image
+   docker build -t chatbot-api .
+
+   # Run container with environment variables
+   docker run -p 8000:8000 \
+     -e ENVIRONMENT=production \
+     -e DATABASE_URL="postgresql://..." \
+     -e OPENAI_API_KEY="sk-..." \
+     chatbot-api
+
+   # Test health endpoint
+   curl http://localhost:8000/api/v1/health
+
+   # Check logs
+   docker logs <container-id>
+"""
+
+
+# ==================== Performance Tips ====================
+
+"""
+Dockerfile optimization:
+
+1. Order matters! Put stable layers first:
+   - Base image (Python)
+   - Install system packages
+   - Copy requirements.txt
+   - Install Python dependencies
+   - Copy application code (changes most often)
+
+2. Use .dockerignore to exclude files:
+   Create .dockerignore in repo root with:
+       __pycache__
+       *.pyc
+       .git
+       .env
+       .venv
+       node_modules
+       .gitignore
+
+3. Minimize layers:
+   ✅ RUN pip install && pip install  (one layer)
+   ❌ RUN pip install && RUN pip install  (two layers)
+
+4. Cache busting:
+   - requirements.txt changes → pip install runs again
+   - Application code changes → COPY layer invalidates cache
+   - Use multi-stage to keep final image small
+
+5. Image size:
+   - python:3.11-slim is ~125MB (good for Render)
+   - Avoid python:3.11 (larger, unnecessary for production)
+   - Virtual environments save ~50MB
+
+Final image size: ~200-400MB depending on dependencies
+Build time: 2-5 minutes on Render
+Cold startup: 10-30 seconds
+Warm startup: <1 second
+"""
+
+
+# ==================== Security ====================
+
+"""
+Security best practices in Dockerfile:
+
+1. Non-root user (shown above)
+   - Container runs as appuser (UID 1000)
+   - Prevents privilege escalation
+   - Standard security practice
+
+2. Don't run pip as root
+   - RUN pip install -r requirements.txt
+   - Already using non-root user
+
+3. Secrets NOT in Dockerfile
+   ❌ RUN echo "sk-..." > /app/key.txt
+   ✅ Use environment variables at runtime
+   ✅ Set in Render dashboard
+
+4. PYTHONUNBUFFERED
+   - Ensures logs appear immediately in Render
+   - Helps with debugging
+
+5. Minimize attack surface
+   - Use slim base image
+   - Only include needed packages
+   - Update base image regularly
+"""

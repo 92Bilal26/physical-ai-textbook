@@ -1,0 +1,252 @@
+# render.yaml - Render Blueprint for FastAPI Backend
+#
+# This is a complete example showing all common configurations.
+# Copy this file to your repository root as "render.yaml" and customize
+# the service name, database names, environment variables, and paths.
+#
+# Documentation: https://render.com/docs/infrastructure-as-code
+
+services:
+  - type: web
+    # Service name (unique within your account)
+    name: my-fastapi-backend
+
+    # Runtime environment
+    runtime: docker
+
+    # Path to Dockerfile relative to repo root
+    dockerfilePath: ./Dockerfile
+
+    # Root directory where your backend code lives
+    # If at repo root, omit this. For monorepos, set to subdirectory
+    rootDir: .
+
+    # Health check endpoint that Render will call periodically
+    # Must return 200 OK to indicate service is healthy
+    healthCheckPath: /api/v1/health
+
+    # Environment variables (non-secret, visible in this file)
+    # For secret values, add them manually in Render dashboard
+    envVars:
+      # Application settings
+      - key: ENVIRONMENT
+        value: production
+      - key: LOG_LEVEL
+        value: INFO
+      - key: DEBUG
+        value: "false"
+
+      # Allowed origins for CORS (comma-separated)
+      # Add your frontend URLs here (GitHub Pages, Vercel, etc.)
+      - key: ALLOWED_ORIGINS
+        value: https://example.com,https://example.github.io
+
+      # Database configuration
+      - key: DATABASE_URL
+        # Link to PostgreSQL database connection string
+        fromDatabase:
+          name: my-postgres-db
+          property: connectionString
+
+      - key: REDIS_URL
+        # Link to Redis instance connection string
+        fromDatabase:
+          name: my-redis-db
+          property: connectionString
+
+      # OpenAI configuration (set these in Render dashboard - they're secrets)
+      - key: OPENAI_API_KEY
+        sync: false  # Don't sync with render.yaml, set manually
+
+      # Qdrant vector database configuration (set these in Render dashboard)
+      - key: QDRANT_URL
+        sync: false
+      - key: QDRANT_API_KEY
+        sync: false
+
+# Databases to create automatically
+databases:
+  # PostgreSQL database for application data
+  - name: my-postgres-db
+    # Actual database name within PostgreSQL
+    databaseName: mydatabasename
+    # Database user
+    user: mydbuser
+    # "free" or "starter" for paid tier
+    plan: free
+
+  # Redis for caching and sessions
+  - name: my-redis-db
+    # "free" or "starter+" for paid tier
+    plan: free
+
+---
+
+# CONFIGURATION GUIDE
+
+## 1. Service Configuration
+
+### name
+- Must be unique within your Render account
+- Used in the generated URL: https://my-fastapi-backend-XXXX.onrender.com
+- Only alphanumeric and hyphens, lowercase
+- Example: my-fastapi-backend
+
+### runtime
+- Always "docker" for FastAPI
+- Render will look for Dockerfile in your repo
+
+### dockerfilePath
+- Path from repo root to your Dockerfile
+- Examples:
+  - "./Dockerfile" - File at repo root
+  - "./backend/Dockerfile" - File in backend subdirectory
+  - "./server/src/Dockerfile" - Nested path
+
+### rootDir
+- Working directory for your application
+- Typically "." (repo root) or a subdirectory for monorepos
+- Example: "./chatbot-backend" - Commands run from this directory
+- Only changes outside rootDir won't trigger redeployment
+
+### healthCheckPath
+- HTTP endpoint that returns 200 OK
+- Render calls this every 30 seconds
+- Examples: "/health", "/api/health", "/api/v1/health"
+- If endpoint doesn't exist, service will be marked as unhealthy
+
+## 2. Environment Variables
+
+### Non-Secret Variables (in render.yaml)
+Store here if safe to commit (no sensitive data):
+- ENVIRONMENT, DEBUG, LOG_LEVEL
+- ALLOWED_ORIGINS (frontend URLs)
+- QDRANT_COLLECTION_NAME, other non-sensitive config
+
+### Secret Variables (set in Render dashboard)
+Add these manually through Render UI for security:
+- API keys (OPENAI_API_KEY, QDRANT_API_KEY)
+- Database credentials
+- Any other sensitive data
+
+### Linking to Databases
+```yaml
+- key: DATABASE_URL
+  fromDatabase:
+    name: my-postgres-db          # Must match database name above
+    property: connectionString    # Always "connectionString"
+```
+
+## 3. Database Configuration
+
+### PostgreSQL
+```yaml
+- name: my-postgres-db          # Service name (unique)
+  databaseName: mydatabasename  # Actual database name
+  user: mydbuser                # Database user
+  plan: free                    # free or starter
+```
+
+### Redis (Key Value on Render)
+```yaml
+- name: my-redis-db
+  plan: free                    # free or starter+
+```
+
+**Important**: Redis appears as "Key Value" in Render dashboard, not "Redis"
+
+## 4. Common Configuration Patterns
+
+### Simple Backend (No Databases)
+```yaml
+services:
+  - type: web
+    name: my-simple-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+```
+
+### Backend with PostgreSQL Only
+```yaml
+services:
+  - type: web
+    name: my-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: my-db
+          property: connectionString
+
+databases:
+  - name: my-db
+    databaseName: mydb
+    user: myuser
+    plan: free
+```
+
+### Monorepo with Backend in Subdirectory
+```yaml
+services:
+  - type: web
+    name: my-api
+    runtime: docker
+    rootDir: ./backend
+    dockerfilePath: ./Dockerfile
+
+    # File changes in backend/ trigger redeploy
+    # Changes outside backend/ don't trigger redeploy
+```
+
+### Complete Stack (Backend + Databases + CORS)
+See the example configuration above.
+
+## 5. Deployment after Creating render.yaml
+
+1. Commit render.yaml to your repository
+2. Push to GitHub
+3. Go to Render dashboard
+4. Click "New +" → "Web Service"
+5. Select your repository
+6. Render will automatically detect render.yaml
+7. Review the configuration and click "Deploy"
+
+Render will:
+- Create databases if they don't exist
+- Build your Docker image
+- Deploy your service
+- Set environment variables
+- Start health checks
+
+## 6. Troubleshooting
+
+### Build failures?
+- Check dockerfilePath is correct
+- Verify Dockerfile exists at that path
+- Check rootDir is set correctly for monorepos
+
+### Database connection errors?
+- Verify database names match exactly in envVars and databases sections
+- Check DATABASE_URL uses "connectionString" not other properties
+- Verify databaseName doesn't have spaces or special characters
+
+### Environment variables not accessible?
+- Check variable names are correct in your app code
+- Verify Pydantic Settings is loading them: `os.getenv("VARIABLE_NAME")`
+- Set sync: false for secret variables that won't sync with YAML
+
+### Service won't start?
+- Check healthCheckPath exists and returns 200 OK
+- Review deployment logs in Render dashboard
+- Ensure all required environment variables are set
+
+## 7. Next Steps After Deployment
+
+1. Monitor logs in Render dashboard
+2. Test health endpoint: curl https://my-fastapi-backend-XXXX.onrender.com/api/v1/health
+3. Create databases if using them
+4. Add secret environment variables in Render dashboard
+5. Redeploy service to pick up new variables
+6. Test API endpoints from your frontend
+7. Fix any CORS errors using the CORS configuration guide

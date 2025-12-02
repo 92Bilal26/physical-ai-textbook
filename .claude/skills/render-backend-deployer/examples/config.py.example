@@ -1,0 +1,224 @@
+# config.py.example - Pydantic Settings Configuration Pattern
+#
+# This example shows how to configure your FastAPI application to work with Render.com.
+# Copy this pattern to your src/config.py and customize for your needs.
+#
+# Key patterns demonstrated:
+# 1. Loading environment variables with defaults
+# 2. Handling list-type variables from comma-separated strings
+# 3. Validating database URLs
+# 4. Separating secrets from non-secrets
+#
+# Documentation: https://docs.pydantic.dev/latest/concepts/settings/
+
+from typing import Union
+from pydantic import BaseSettings, field_validator, HttpUrl
+import os
+
+
+class Settings(BaseSettings):
+    """Application settings loaded from environment variables.
+
+    In Render.com:
+    - Non-secret variables go in render.yaml (ENVIRONMENT, LOG_LEVEL, ALLOWED_ORIGINS)
+    - Secret variables are set manually in Render dashboard (API keys, database URLs)
+    """
+
+    # ==================== Application Settings ====================
+
+    ENVIRONMENT: str = "development"
+    """Application environment: development, staging, or production"""
+
+    LOG_LEVEL: str = "INFO"
+    """Logging level: DEBUG, INFO, WARNING, ERROR, CRITICAL"""
+
+    DEBUG: bool = False
+    """Debug mode (should be False in production)"""
+
+    # ==================== Database Configuration ====================
+
+    DATABASE_URL: str = None
+    """PostgreSQL connection string from Render database.
+
+    Format: postgresql://user:password@host/dbname
+
+    In Render.com:
+    - Set in render.yaml using `fromDatabase` for auto-linking
+    - Or add manually in Environment tab as a secret variable
+    """
+
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def validate_database_url(cls, v):
+        """Ensure DATABASE_URL is set and properly formatted."""
+        if not v:
+            raise ValueError("DATABASE_URL is required")
+        if not v.startswith(("postgresql://", "postgres://")):
+            raise ValueError(f"DATABASE_URL must start with postgresql://, got: {v[:20]}...")
+        return v
+
+    REDIS_URL: str = None
+    """Redis connection string for caching and sessions.
+
+    Format: redis://host:port
+
+    Optional - only required if using Redis for caching.
+    """
+
+    # ==================== CORS Configuration ====================
+
+    ALLOWED_ORIGINS: Union[str, list] = "http://localhost:3000"
+    """Allowed origins for CORS preflight requests.
+
+    Format in environment variable: comma-separated string
+    - Example: https://example.com,https://example.github.io,http://localhost:3000
+
+    This validator converts comma-separated string to list.
+
+    In Render.com environment variable:
+    ALLOWED_ORIGINS=https://yourusername.github.io,https://example.com
+    """
+
+    @field_validator("ALLOWED_ORIGINS", mode="before")
+    @classmethod
+    def parse_origins(cls, v):
+        """Convert comma-separated string to list of origins.
+
+        Handles both:
+        - String input: "https://example.com,https://other.com" → list
+        - List input: ["https://example.com"] → list (passthrough)
+        """
+        if isinstance(v, str):
+            # Split by comma and strip whitespace from each origin
+            return [o.strip() for o in v.split(",") if o.strip()]
+        elif isinstance(v, list):
+            return v
+        else:
+            return []
+
+    # ==================== API Key Configuration ====================
+
+    OPENAI_API_KEY: str = None
+    """OpenAI API key for GPT models.
+
+    Format: sk-... (starts with sk-)
+
+    In Render.com:
+    - Set as a secret variable in Environment tab
+    - Never commit to repository
+    - Set sync: false in render.yaml
+    """
+
+    QDRANT_URL: str = None
+    """Qdrant vector database URL.
+
+    Format: https://host:6333 (usually includes port)
+
+    Optional - only required if using Qdrant for vector storage.
+    """
+
+    QDRANT_API_KEY: str = None
+    """Qdrant API key for authentication.
+
+    Optional - only required if using Qdrant.
+    """
+
+    # ==================== Application-Specific Settings ====================
+
+    QDRANT_COLLECTION_NAME: str = "documents"
+    """Name of the Qdrant collection for vector embeddings.
+
+    Can be configured per deployment.
+    """
+
+    CHAT_MODEL: str = "gpt-4"
+    """Default model for chat completions.
+
+    Other options: gpt-3.5-turbo, gpt-4-turbo, etc.
+    """
+
+    # ==================== Configuration Management ====================
+
+    class Config:
+        """Pydantic config for environment variable loading."""
+        env_file = ".env"
+        case_sensitive = True
+        extra = "allow"  # Allow extra fields from environment
+
+    def is_production(self) -> bool:
+        """Check if running in production."""
+        return self.ENVIRONMENT.lower() == "production"
+
+    def is_development(self) -> bool:
+        """Check if running in development."""
+        return self.ENVIRONMENT.lower() == "development"
+
+
+# ==================== Load Settings ====================
+
+# Create a singleton instance
+settings = Settings()
+
+
+# ==================== Usage Example ====================
+
+"""
+In your FastAPI main.py:
+
+    from src.config import settings
+    from fastapi import FastAPI
+    from fastapi.middleware.cors import CORSMiddleware
+
+    app = FastAPI()
+
+    # Load settings (validates all required variables)
+    print(f"Running in {settings.ENVIRONMENT}")
+    print(f"Log level: {settings.LOG_LEVEL}")
+    print(f"Allowed origins: {settings.allowed_origins}")
+
+    # Configure CORS with loaded settings
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.ALLOWED_ORIGINS,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+Environment variable examples:
+
+    # For local development (.env file)
+    ENVIRONMENT=development
+    LOG_LEVEL=DEBUG
+    DATABASE_URL=postgresql://user:password@localhost/mydb
+    ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
+    OPENAI_API_KEY=sk-...
+    QDRANT_URL=http://localhost:6333
+    QDRANT_API_KEY=optional-api-key
+
+    # For Render.com (set in render.yaml and dashboard)
+    ENVIRONMENT=production
+    LOG_LEVEL=INFO
+    DATABASE_URL=<auto-linked from PostgreSQL>
+    ALLOWED_ORIGINS=https://yourusername.github.io,https://example.com
+    OPENAI_API_KEY=<set in dashboard as secret>
+    QDRANT_URL=<set in dashboard as secret>
+    QDRANT_API_KEY=<set in dashboard as secret>
+
+Common issues:
+
+    1. "Can't load plugin: sqlalchemy.dialects:driver"
+       → DATABASE_URL is missing or malformed
+       → Check it's set in Render environment tab
+       → Verify format: postgresql://user:password@host/dbname
+
+    2. "Input should be a valid string [type=string_type]"
+       → ALLOWED_ORIGINS field type mismatch
+       → Use Union[str, list] with field_validator (shown above)
+       → Format in environment: comma-separated, no brackets
+
+    3. "Required variable X not found"
+       → Check environment variable is set in Render dashboard
+       → Verify variable name matches exactly (case-sensitive)
+       → For development, create .env file with variables
+"""

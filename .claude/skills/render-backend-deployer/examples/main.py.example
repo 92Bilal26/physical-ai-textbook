@@ -1,0 +1,284 @@
+# main.py.example - FastAPI CORS Configuration Pattern
+#
+# This example shows the CORRECT way to configure CORS middleware for Render.com.
+# Copy this pattern to your src/main.py and customize for your needs.
+#
+# KEY RULE: In FastAPI, middleware is executed in REVERSE order of addition.
+# Since CORS must run FIRST, add it LAST in your code.
+#
+# Documentation:
+# - FastAPI middleware: https://fastapi.tiangolo.com/tutorial/middleware/
+# - CORS: https://fastapi.tiangolo.com/tutorial/cors/
+
+import logging
+from contextlib import asynccontextmanager
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from src.config import settings
+
+# Configure logging
+logging.basicConfig(level=settings.LOG_LEVEL)
+logger = logging.getLogger(__name__)
+
+
+# ==================== Lifecycle Events ====================
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan events: startup and shutdown.
+
+    Called when the application starts and stops.
+    """
+    # Startup
+    logger.info(f"🚀 Starting RAG Chatbot API...")
+    logger.info(f"Environment: {settings.ENVIRONMENT}")
+    logger.info(f"Log Level: {settings.LOG_LEVEL}")
+    logger.info(f"Allowed Origins: {settings.ALLOWED_ORIGINS}")
+
+    # Database connection would happen here
+    # await init_db()
+
+    yield
+
+    # Shutdown
+    logger.info("🛑 Shutting down...")
+    # Database cleanup would happen here
+    # await close_db()
+
+
+# ==================== FastAPI App Creation ====================
+
+app = FastAPI(
+    title="RAG Chatbot API",
+    description="FastAPI backend for RAG chatbot with vector search",
+    version="1.0.0",
+    lifespan=lifespan,
+)
+
+
+# ==================== Middleware Configuration ====================
+
+# ⚠️  CRITICAL: Middleware order matters!
+#
+# Execution order is REVERSE of addition order:
+# If you add: [A, B, C], execution is: C → B → A → App → A → B → C
+#
+# Since CORS must run FIRST, add it LAST in code.
+
+# ✅ STEP 1: Add CORS middleware LAST (so it runs FIRST)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
+    # Optional: restrict specific methods/headers
+    # allow_methods=["GET", "POST", "PUT", "DELETE"],
+    # allow_headers=["Content-Type", "Authorization"],
+    max_age=600,  # Cache preflight for 10 minutes
+)
+
+# ✅ STEP 2: Add other middleware AFTER CORS
+# Example: rate limiting, logging, error handling, etc.
+# (None added in this example, but follow this pattern)
+
+
+# ==================== Health Check Endpoint ====================
+
+@app.get("/api/v1/health", tags=["Health"])
+async def health_check():
+    """Health check endpoint for Render.com monitoring.
+
+    Render calls this every 30 seconds to verify the service is alive.
+    This endpoint must return 200 OK for deployment to succeed.
+
+    In render.yaml:
+        healthCheckPath: /api/v1/health
+
+    Must return 200 OK status and JSON response.
+    """
+    return {
+        "status": "ok",
+        "environment": settings.ENVIRONMENT,
+        "service": "rag-chatbot-api",
+    }
+
+
+# ==================== Root Endpoint ====================
+
+@app.get("/", tags=["Root"])
+async def root():
+    """Root endpoint with API information."""
+    return {
+        "service": "RAG Chatbot API",
+        "version": "1.0.0",
+        "docs": "/docs",
+        "health": "/api/v1/health",
+        "environment": settings.ENVIRONMENT,
+    }
+
+
+# ==================== Example Route ====================
+
+@app.post("/api/v1/chat/query", tags=["Chat"])
+async def query_chat(query: dict):
+    """Chat query endpoint.
+
+    This is an example endpoint. Replace with your actual chat logic.
+
+    Request:
+        {
+            "message": "What is RAG?"
+        }
+
+    Response:
+        {
+            "response": "RAG stands for Retrieval-Augmented Generation...",
+            "sources": [...]
+        }
+    """
+    message = query.get("message", "")
+
+    if not message:
+        return {"error": "Message is required"}
+
+    # Your actual chat logic would go here
+    response = f"You said: {message}"
+
+    return {
+        "query": message,
+        "response": response,
+        "sources": [],
+    }
+
+
+# ==================== Error Handling ====================
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc):
+    """Global exception handler for all unhandled errors."""
+    logger.error(f"Unhandled exception: {exc}", exc_info=True)
+    return {
+        "error": "Internal server error",
+        "detail": str(exc) if settings.DEBUG else "An error occurred",
+    }
+
+
+# ==================== Include Routers ====================
+
+# Example: Include routers from other modules
+# from src.routers import chat, documents
+# app.include_router(chat.router, prefix="/api/v1", tags=["Chat"])
+# app.include_router(documents.router, prefix="/api/v1", tags=["Documents"])
+
+
+# ==================== Running the App ====================
+
+"""
+To run locally:
+
+    # Install dependencies
+    pip install -r requirements.txt
+
+    # Run development server
+    uvicorn src.main:app --reload
+
+    # Run with specific host/port
+    uvicorn src.main:app --host 0.0.0.0 --port 8000
+
+To run in Docker (Render uses this):
+
+    # Build image
+    docker build -t chatbot-api .
+
+    # Run container
+    docker run -p 8000:8000 \
+        -e DATABASE_URL=postgresql://... \
+        -e OPENAI_API_KEY=sk-... \
+        chatbot-api
+
+    # Test health endpoint
+    curl http://localhost:8000/api/v1/health
+
+To test CORS locally:
+
+    # Test preflight request
+    curl -X OPTIONS http://localhost:8000/api/v1/chat/query \
+        -H "Origin: http://localhost:3000" \
+        -H "Access-Control-Request-Method: POST" \
+        -v
+
+    # Should see response headers:
+    # access-control-allow-origin: http://localhost:3000
+    # access-control-allow-methods: GET, POST, PUT, DELETE, ...
+"""
+
+
+# ==================== Environment Variable Issues ====================
+
+"""
+If you get CORS errors in production:
+
+PROBLEM: "Access to fetch blocked by CORS policy"
+
+Debugging:
+
+1. Check middleware order (CORS should be LAST in add_middleware calls)
+
+2. Verify ALLOWED_ORIGINS includes frontend URL
+   - Check Render Environment tab
+   - Should include: https://yourusername.github.io
+   - Format: comma-separated, not JSON brackets
+
+3. Test preflight from frontend (DevTools Network tab)
+   - Look for OPTIONS request
+   - Check response headers for "access-control-allow-origin"
+
+4. Check settings are loaded correctly
+   logger.info(f"CORS Origins: {settings.ALLOWED_ORIGINS}")
+
+5. Verify middleware stack
+   for middleware in app.user_middleware:
+       print(f"  - {middleware.cls.__name__}")
+"""
+
+
+# ==================== Key Rules for Render.com ====================
+
+"""
+✅ DO:
+- Add CORS middleware LAST (runs first)
+- Use Union[str, list] for list-type settings
+- Validate DATABASE_URL exists before app starts
+- Return 200 OK from health endpoint
+- Log startup info to verify configuration
+- Use environment variables for all configuration
+
+❌ DON'T:
+- Add rate-limiting middleware before CORS (blocks preflight)
+- Hardcode allowed origins
+- Use JSON brackets in ALLOWED_ORIGINS environment variable
+- Create new database engine per request
+- Assume environment variables are set (validate them)
+
+CORS Preflight Flow:
+
+    1. Browser sends OPTIONS request with headers:
+       - Origin: https://yourusername.github.io
+       - Access-Control-Request-Method: POST
+       - Access-Control-Request-Headers: content-type
+
+    2. CORSMiddleware (runs first) checks:
+       - Is origin in allow_origins?
+       - Add CORS response headers
+       - Return 200 OK
+
+    3. Browser sees CORS headers
+       - Allows the actual POST request
+
+    4. If middleware runs in wrong order:
+       - Rate limiter might reject preflight
+       - CORSMiddleware never adds headers
+       - Browser blocks request
+"""
