@@ -3,37 +3,53 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "../db";
 import * as schema from "../db/schema";
 
-export const auth = betterAuth({
-  database: drizzleAdapter(db, {
-    provider: "pg",
-    schema: {
-      user: schema.users,
-      session: schema.sessions,
-      account: schema.accounts,
-      verification: schema.verificationTokens,
-    },
-  }),
-  secret: process.env.BETTER_AUTH_SECRET || "default-secret-change-me",
-  emailAndPassword: {
-    enabled: true,
-    autoSignUpEmail: false,
-  },
-  socialProviders: {
-    github: {
-      clientId: process.env.GITHUB_CLIENT_ID || "",
-      clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
-    },
-    google: {
-      clientId: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-    },
-  },
-  plugins: [],
-  trustedOrigins: [
-    process.env.FRONTEND_URL || "http://localhost:3000",
-    "http://localhost:3000",
-    "http://localhost:5173", // Vite default
-  ],
-});
+let authInstance: ReturnType<typeof betterAuth> | null = null;
 
-export const createAuthHandler = () => auth.handler;
+function getAuth() {
+  if (!authInstance) {
+    authInstance = betterAuth({
+      database: drizzleAdapter(db, {
+        provider: "pg",
+        schema: {
+          user: schema.users,
+          session: schema.sessions,
+          account: schema.accounts,
+          verification: schema.verificationTokens,
+        },
+      }),
+      secret: process.env.BETTER_AUTH_SECRET || "default-secret-change-me",
+      emailAndPassword: {
+        enabled: true,
+        autoSignUpEmail: false,
+      },
+      socialProviders: {
+        github: {
+          clientId: process.env.GITHUB_CLIENT_ID || "",
+          clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
+        },
+        google: {
+          clientId: process.env.GOOGLE_CLIENT_ID || "",
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+        },
+      },
+      plugins: [],
+      trustedOrigins: [
+        process.env.FRONTEND_URL || "http://localhost:3000",
+        "http://localhost:3000",
+        "http://localhost:5173", // Vite default
+      ],
+    });
+  }
+  return authInstance;
+}
+
+export const auth = new Proxy(
+  {},
+  {
+    get: (_, prop) => {
+      return (getAuth() as any)[prop];
+    },
+  }
+) as ReturnType<typeof betterAuth>;
+
+export const createAuthHandler = () => getAuth().handler;

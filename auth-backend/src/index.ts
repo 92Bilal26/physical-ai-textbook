@@ -67,9 +67,17 @@ async function initializeDatabase() {
 // Start server
 async function startServer() {
   try {
+    console.log("ℹ️  Environment check:");
+    console.log(`   - PORT: ${PORT}`);
+    console.log(`   - FRONTEND_URL: ${FRONTEND_URL}`);
+    console.log(`   - NODE_ENV: ${process.env.NODE_ENV}`);
+    console.log(`   - BETTER_AUTH_SECRET: ${process.env.BETTER_AUTH_SECRET ? "✅ Set" : "❌ Not set"}`);
+    console.log(`   - DATABASE_URL: ${process.env.DATABASE_URL ? "✅ Set" : "❌ Not set"}`);
+
     await initializeDatabase();
-    app.listen(PORT, () => {
-      console.log(`🚀 Auth server running on http://localhost:${PORT}`);
+
+    const server = app.listen(PORT, () => {
+      console.log(`\n🚀 Auth server running on http://localhost:${PORT}`);
       console.log(`📍 Frontend URL: ${FRONTEND_URL}`);
       console.log(`📚 API Routes:`);
       console.log(`   - POST /api/auth/sign-up`);
@@ -80,10 +88,23 @@ async function startServer() {
       console.log(`   - PUT /api/users/profile`);
       console.log(`   - GET /health`);
     });
+
+    // Handle graceful shutdown
+    process.on("SIGTERM", () => {
+      console.log("SIGTERM received, shutting down gracefully");
+      server.close(() => {
+        console.log("Server closed");
+        process.exit(0);
+      });
+    });
   } catch (error) {
-    console.error("Failed to start server:", error);
+    console.error("❌ Failed to start server:", error);
     process.exit(1);
   }
 }
 
-startServer();
+console.log("Starting auth server...");
+startServer().catch(error => {
+  console.error("Fatal error:", error);
+  process.exit(1);
+});
