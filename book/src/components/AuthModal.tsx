@@ -8,12 +8,12 @@ interface AuthModalProps {
   onAuthSuccess?: (user: User) => void;
 }
 
-// Use window location for API URL (works in browser)
+// Backend API URL - points to Render deployment
 const getApiUrl = () => {
   if (typeof window === 'undefined') return 'http://localhost:3001';
   return window.location.hostname === 'localhost'
     ? 'http://localhost:3001'
-    : `https://${window.location.hostname}:3001`;
+    : 'https://physical-ai-auth.onrender.com'; // Render backend URL
 };
 
 export default function AuthModal({ isOpen: propIsOpen, onClose: propOnClose, onAuthSuccess }: AuthModalProps) {
