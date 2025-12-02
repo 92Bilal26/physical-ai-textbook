@@ -5,6 +5,7 @@ import { auth } from "./auth";
 import { userProfileRoutes } from "./routes/userProfile";
 import { setupUserProfileSchema } from "./db/userProfileSchema";
 import { validateDatabaseConnection } from "./db";
+import { toNodeHandler } from "better-auth/node";
 
 dotenv.config();
 
@@ -12,10 +13,13 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 
+// Parse FRONTEND_URL for CORS (can be comma-separated)
+const allowedOrigins = FRONTEND_URL.split(",").map(url => url.trim());
+
 // Middleware
 app.use(express.json());
 app.use(cors({
-  origin: FRONTEND_URL,
+  origin: allowedOrigins,
   credentials: true,
 }));
 
@@ -25,15 +29,8 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   next();
 });
 
-// Better Auth routes
-app.all("/api/auth/*", (req: Request, res: Response) => {
-  // Using auth's handler method
-  const handler = (auth as any).handler;
-  if (handler) {
-    return handler(req, res);
-  }
-  res.status(500).json({ error: "Auth handler not configured" });
-});
+// Better Auth routes - use toNodeHandler for Express compatibility
+app.all("/api/auth/*", toNodeHandler(auth));
 
 // User profile routes
 app.use("/api/users", userProfileRoutes);

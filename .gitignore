@@ -44,6 +44,9 @@ Thumbs.db
 .env.local
 .env.*.local
 
+# Authentication data (local development)
+auth-backend/local-data.json
+
 # Misc
 *.log
 *.tmp

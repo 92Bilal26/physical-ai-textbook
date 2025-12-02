@@ -1,19 +1,17 @@
 import type {ReactNode} from 'react';
-import { useState } from 'react';
 import clsx from 'clsx';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
 import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import Heading from '@theme/Heading';
-import AuthModal from '@site/src/components/AuthModal';
+import { useAuth } from '@site/src/contexts/AuthContext';
 
 import styles from './index.module.css';
 
 function HomepageHeader() {
   const {siteConfig} = useDocusaurusContext();
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [user, setUser] = useState<{id: string; email: string; name?: string} | null>(null);
+  const { user, openAuthModal } = useAuth();
 
   return (
     <header className={clsx('hero hero--primary', styles.heroBanner)}>
@@ -30,17 +28,12 @@ function HomepageHeader() {
           </Link>
           <button
             className={clsx('button button--primary button--lg', styles.authBtn)}
-            onClick={() => setIsAuthOpen(true)}
+            onClick={openAuthModal}
           >
             {user ? `👤 ${user.name || user.email}` : '🔐 Sign In / Sign Up'}
           </button>
         </div>
       </div>
-      <AuthModal
-        isOpen={isAuthOpen}
-        onClose={() => setIsAuthOpen(false)}
-        onAuthSuccess={(userData) => setUser(userData)}
-      />
     </header>
   );
 }

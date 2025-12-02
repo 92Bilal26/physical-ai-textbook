@@ -1,57 +1,39 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styles from './AuthModal.module.css';
-
-interface User {
-  id: string;
-  email: string;
-  name?: string;
-}
+import { useAuth, User } from '@site/src/contexts/AuthContext';
 
 interface AuthModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
   onAuthSuccess?: (user: User) => void;
 }
 
-export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalProps) {
+// Use window location for API URL (works in browser)
+const getApiUrl = () => {
+  if (typeof window === 'undefined') return 'http://localhost:3001';
+  return window.location.hostname === 'localhost'
+    ? 'http://localhost:3001'
+    : `https://${window.location.hostname}:3001`;
+};
+
+export default function AuthModal({ isOpen: propIsOpen, onClose: propOnClose, onAuthSuccess }: AuthModalProps) {
+  const { user, setUser, isAuthModalOpen, closeAuthModal } = useAuth();
+
+  // Support both controlled (props) and context-based usage
+  const isOpen = propIsOpen !== undefined ? propIsOpen : isAuthModalOpen;
+  const onClose = propOnClose || closeAuthModal;
+
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error' | 'info'>('info');
-  const [user, setUser] = useState<User | null>(null);
 
   // Form states
   const [email, setEmail] = useState('test@example.com');
   const [password, setPassword] = useState('Test123!@');
   const [name, setName] = useState('Test User');
 
-  // Use window location for API URL (works in browser)
-  const API_URL = typeof window !== 'undefined'
-    ? (window.location.hostname === 'localhost'
-      ? 'http://localhost:3001'
-      : `https://${window.location.hostname}:3001`)
-    : 'http://localhost:3001';
-
-  useEffect(() => {
-    // Check if user is already logged in
-    if (isOpen) {
-      checkSession();
-    }
-  }, [isOpen]);
-
-  const checkSession = async () => {
-    try {
-      const response = await fetch(`${API_URL}/api/auth/session`, {
-        credentials: 'include',
-      });
-      const data = await response.json();
-      if (data && data.user) {
-        setUser(data.user);
-      }
-    } catch (error) {
-      console.log('Not logged in');
-    }
-  };
+  const API_URL = getApiUrl();
 
   const showMessage = (msg: string, type: 'success' | 'error' | 'info') => {
     setMessage(msg);
