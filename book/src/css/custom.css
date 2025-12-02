@@ -5,6 +5,9 @@
 
 @import './homepage.css';
 
+/* Urdu Font - Noto Nastaliq Urdu for translation feature */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&display=swap');
+
 /* Physical AI Robotics Theme Colors */
 :root {
   --ifm-color-primary: #06b6d4;      /* Cyan accent */
