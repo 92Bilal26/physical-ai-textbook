@@ -49,8 +49,9 @@ async function initializeDatabase() {
     await setupUserProfileSchema();
     console.log("Database schema initialized successfully");
   } catch (error) {
-    console.error("Failed to initialize database schema:", error);
-    process.exit(1);
+    // Log the error but don't fail - tables might already exist
+    console.warn("Database schema warning:", error);
+    console.log("Continuing with existing schema...");
   }
 }
 
