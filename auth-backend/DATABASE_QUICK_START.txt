@@ -1,0 +1,172 @@
+════════════════════════════════════════════════════════════════════════════
+  HOW TO GET A POSTGRESQL DATABASE - ONE PAGE QUICK REFERENCE
+════════════════════════════════════════════════════════════════════════════
+
+CHOOSE YOUR PATH BELOW:
+
+═ OPTION 1: DOCKER (FASTEST - 2 MINUTES) ════════════════════════════════════
+
+What you need:
+  • Docker Desktop installed (https://docker.com/download)
+
+Steps:
+  1. Run this ONE command:
+
+     docker run --name postgres_auth \
+       -e POSTGRES_USER=authuser \
+       -e POSTGRES_PASSWORD=authpass123 \
+       -e POSTGRES_DB=physical_ai_auth \
+       -p 5432:5432 \
+       -d postgres:16
+
+  2. Update .env with:
+     DATABASE_URL=postgresql://authuser:authpass123@localhost:5432/physical_ai_auth
+
+  3. Done! ✅
+
+═ OPTION 2: LOCAL POSTGRESQL (10 MINUTES) ═══════════════════════════════════
+
+What you need:
+  • PostgreSQL installed on your computer
+
+Windows:
+  1. Download: https://www.postgresql.org/download/windows/
+  2. Install (remember the password!)
+  3. Run: createdb physical_ai_auth
+  4. Update .env:
+     DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/physical_ai_auth
+
+macOS:
+  1. brew install postgresql@16
+  2. brew services start postgresql@16
+  3. createdb physical_ai_auth
+  4. Update .env:
+     DATABASE_URL=postgresql://postgres@localhost:5432/physical_ai_auth
+
+Linux:
+  1. sudo apt-get install postgresql
+  2. sudo service postgresql start
+  3. createdb physical_ai_auth
+  4. Update .env:
+     DATABASE_URL=postgresql://postgres@localhost:5432/physical_ai_auth
+
+═ OPTION 3: RENDER.COM (CLOUD - 3 MINUTES) ════════════════════════════════
+
+What you need:
+  • A free Render account (https://render.com)
+  • Internet connection
+
+Steps:
+  1. Sign up at https://render.com
+  2. Click "New" → Select "PostgreSQL"
+  3. Fill in:
+     Name: physical-ai-auth
+     Database: physical_ai_auth
+     User: authuser
+     Version: 16
+  4. Click "Create Database"
+  5. Wait 2-3 minutes
+  6. Copy the "External Database URL"
+  7. Update .env:
+     DATABASE_URL=<paste_the_url_here>
+
+═ OPTION 4: RAILWAY.APP (CLOUD - 3 MINUTES) ═══════════════════════════════
+
+What you need:
+  • A free Railway account (https://railway.app)
+  • GitHub account (for easiest login)
+  • Internet connection
+
+Steps:
+  1. Sign up at https://railway.app
+  2. New Project → Select PostgreSQL
+  3. Wait for instant setup
+  4. Click PostgreSQL service
+  5. Go to "Connect" tab
+  6. Copy the connection string
+  7. Update .env:
+     DATABASE_URL=<paste_the_url_here>
+
+═ OPTION 5: VERCEL POSTGRES (IF USING VERCEL) ═════════════════════════════
+
+What you need:
+  • Vercel account
+  • Already using Vercel for your frontend
+
+Steps:
+  1. Go to https://vercel.com/storage/postgres
+  2. Create new database
+  3. Select region
+  4. Click "Connect"
+  5. Copy connection string
+  6. Update .env:
+     DATABASE_URL=<paste_the_url_here>
+
+════════════════════════════════════════════════════════════════════════════
+
+MY RECOMMENDATIONS:
+
+For Right Now (Testing):
+  👉 Use DOCKER - Fastest, no installation
+
+For Team/Production:
+  👉 Use RENDER - Free, cloud, easy to share
+
+If Already Using Vercel:
+  👉 Use VERCEL POSTGRES - Integrated experience
+
+════════════════════════════════════════════════════════════════════════════
+
+AFTER CHOOSING:
+
+1. Set up database using your chosen option above
+2. Get your connection string (DATABASE_URL)
+3. Update .env file in auth-backend directory
+4. Test connection:
+   psql $DATABASE_URL -c "SELECT 1;"
+   (Should show "1" in output)
+
+5. Run migrations:
+   psql $DATABASE_URL < migrations/0001_initial_schema.sql
+
+6. Start backend:
+   npm run dev
+
+7. Test health endpoint:
+   curl http://localhost:3001/health
+
+════════════════════════════════════════════════════════════════════════════
+
+IF YOU GET STUCK:
+
+Read these files:
+  • GET_DATABASE.md - Detailed instructions for each option
+  • DATABASE_COMPARISON.md - Visual comparison
+  • SETUP_GUIDE.md - Full setup with troubleshooting
+
+════════════════════════════════════════════════════════════════════════════
+
+CONNECTION STRING EXAMPLES:
+
+Docker / Local:
+postgresql://authuser:authpass123@localhost:5432/physical_ai_auth
+
+Render / Railway / Vercel:
+(They give you this - just copy and paste)
+
+════════════════════════════════════════════════════════════════════════════
+
+QUICK DECISION:
+
+1. Do you have Docker? → Use DOCKER
+2. Do you want cloud? → Use RENDER
+3. Using Vercel? → Use VERCEL POSTGRES
+4. Otherwise → Use LOCAL POSTGRESQL
+
+════════════════════════════════════════════════════════════════════════════
+
+That's it! Pick one, follow the steps, and you'll have a database ready! 🎉
+
+For more details, read GET_DATABASE.md or DATABASE_COMPARISON.md
+
+════════════════════════════════════════════════════════════════════════════
