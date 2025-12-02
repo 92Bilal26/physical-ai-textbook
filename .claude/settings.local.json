@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "SlashCommand(/sp.specify Create a reusable skill for deploying Python/FastAPI backends to Render.com with render.yaml Blueprint. The skill should guide through database creation (PostgreSQL, Redis), environment variable configuration, debugging common deployment errors (DATABASE_URL mismatches, CORS issues, middleware order), and frontend URL configuration. It should be based on the learnings from deploying the RAG chatbot backend that we just completed in this session.)",
+      "SlashCommand(/sp.specify Add user authentication with Better Auth to the Physical AI Textbook. During signup, collect user background information (software development experience, hardware/robotics background, programming language proficiency) to personalize content. Create signup, signin, logout flows with profile management. Store user preferences for content recommendations.)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

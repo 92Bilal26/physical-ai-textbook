@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import { auth } from "./auth";
 import { userProfileRoutes } from "./routes/userProfile";
 import { setupUserProfileSchema } from "./db/userProfileSchema";
+import { validateDatabaseConnection } from "./db";
 
 dotenv.config();
 
@@ -45,13 +46,21 @@ app.get("/health", (_req: Request, res: Response) => {
 // Initialize database schema
 async function initializeDatabase() {
   try {
-    console.log("Setting up user profile schema...");
+    console.log("📡 Validating database connection...");
+    const isConnected = await validateDatabaseConnection();
+
+    if (!isConnected) {
+      console.warn("⚠️  Database connection failed - some features may not work");
+      return;
+    }
+
+    console.log("✅ Setting up user profile schema...");
     await setupUserProfileSchema();
-    console.log("Database schema initialized successfully");
+    console.log("✅ Database schema initialized successfully");
   } catch (error) {
     // Log the error but don't fail - tables might already exist
-    console.warn("Database schema warning:", error);
-    console.log("Continuing with existing schema...");
+    console.warn("⚠️  Database schema warning:", error);
+    console.log("ℹ️  Continuing with existing schema...");
   }
 }
 
