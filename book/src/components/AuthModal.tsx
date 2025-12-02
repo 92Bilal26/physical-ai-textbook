@@ -25,7 +25,12 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
   const [password, setPassword] = useState('Test123!@');
   const [name, setName] = useState('Test User');
 
-  const API_URL = process.env.REACT_APP_AUTH_URL || 'http://localhost:3001';
+  // Use window location for API URL (works in browser)
+  const API_URL = typeof window !== 'undefined'
+    ? (window.location.hostname === 'localhost'
+      ? 'http://localhost:3001'
+      : `https://${window.location.hostname}:3001`)
+    : 'http://localhost:3001';
 
   useEffect(() => {
     // Check if user is already logged in
