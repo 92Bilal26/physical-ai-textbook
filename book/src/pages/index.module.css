@@ -20,4 +20,28 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.authBtn {
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.authBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+@media screen and (max-width: 768px) {
+  .buttons {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .buttons button {
+    width: 100%;
+  }
 }
